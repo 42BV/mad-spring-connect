@@ -7,7 +7,7 @@ import {
   post,
   put,
   remove as requestRemove
-} from '../src/request';
+} from './request';
 
 import type { Page } from './spring-models';
 
