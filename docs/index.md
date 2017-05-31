@@ -158,16 +158,18 @@ pokemon.save().then(() => {
   // The pokemon instance will now have an id.
   // Because every property from the back-end response
   // is merged into the pokemon instance automatically.
-});
 
-console.log(pokemon.id); // Prints "1";
+  console.log(pokemon.id); // Prints "1";
 
-// This PUT to api/pokemon/1, with all the properties of Pokemon as the body.
-pokemon.save();
+  // This PUT to api/pokemon/1, with all the properties of Pokemon as the body.
+  pokemon.save();
 
-// This will DELETE to api/pokemon/1.
-pokemon.remove().then(() => {
-  // The pokemon instance will no longer have an id.
+  // This will DELETE to api/pokemon/1.
+  pokemon.remove().then(() => {
+    // The pokemon instance will no longer have an id.
+
+    console.log(pokemon.id); // Prints "undefined";
+  });
 });
 ```
 
@@ -211,7 +213,7 @@ For example:
 ```js
 import { get } from 'mad-spring-connect';
 
-get('api/pokemon/1', { page: 1 }).then((json) => {
+get('api/pokemon', { page: 1 }).then((json) => {
   // Do something with the json here
 });
 ```
@@ -315,6 +317,9 @@ configureMadConnect({
   middleware: [checkStatus, parseJSON]
 });
 ```
+
+In the above example we configure that `fetch` will be the fetch
+defined in the [redux-mad-authentication](https://github.com/42BV/redux-mad-authentication#send-a-request-with-the-csrf-token-as-the-current-user) library.
 
 If you do not configure mad-spring-connect, it will use
 window.fetch and the default middlewares.

@@ -13,7 +13,7 @@ import type { Middleware } from './middleware';
  * 
  * @example
  * ```js
- *  get('api/pokemon/1', { page: 1 }).then((json) => {
+ *  get('api/pokemon', { page: 1 }).then((json) => {
  *   // Do something with the json here
  *  });
  * ```
