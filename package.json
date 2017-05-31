@@ -50,7 +50,7 @@
     "start": "jest test --watch",
     "test": "npm run flow && jest test --coverage",
     "flow": "flow",
-    "prepublish": "npm test && npm run babel-prepublish && npm run flow-prepublish",
+    "prepublish": "rm -rf lib && npm test && npm run babel-prepublish && npm run flow-prepublish",
     "babel-prepublish": "babel src/ -d lib",
     "flow-prepublish": "flow-copy-source src lib"
   }
