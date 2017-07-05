@@ -37,6 +37,12 @@ export interface Resource<T> {
  * subclass of the given DomainClass which implements the Resource 
  * interface.
  * 
+ * Adds the following instance methods: `save` and `remove`.
+ * Adds the following static methdos: `one`, `list` and `page`.
+ * 
+ * It will not override instance, and static method if they are
+ * already defined.
+ * 
  * @example
  * ```js
  * class Pokemon {
@@ -53,12 +59,25 @@ export interface Resource<T> {
  * @param {string} baseUrl The part of the url which is constant, for example 'api/pokemon/';
  */
 export function makeResource<T>(DomainClass: *, baseUrl: string) {
-  DomainClass.prototype.save = makeSave(DomainClass, baseUrl);
-  DomainClass.prototype.remove = makeRemove(DomainClass, baseUrl);
+  if (DomainClass.prototype.save === undefined) {
+    DomainClass.prototype.save = makeSave(DomainClass, baseUrl);
+  }
+  
+  if (DomainClass.prototype.remove === undefined) {
+    DomainClass.prototype.remove = makeRemove(DomainClass, baseUrl);
+  }
 
-  DomainClass.one = makeOne(DomainClass, baseUrl);
-  DomainClass.list = makeList(DomainClass, baseUrl);
-  DomainClass.page = makePage(DomainClass, baseUrl);
+  if (DomainClass.one === undefined) {
+    DomainClass.one = makeOne(DomainClass, baseUrl);
+  }
+
+  if (DomainClass.list === undefined) {
+    DomainClass.list = makeList(DomainClass, baseUrl);
+  }
+
+  if (DomainClass.page === undefined) {
+    DomainClass.page = makePage(DomainClass, baseUrl);
+  }
 }
 
 function makeSave<T: { id: ?number }>(DomainClass: Class<T>, baseUrl: string): () => Promise<T> {

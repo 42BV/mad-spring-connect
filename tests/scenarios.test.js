@@ -14,50 +14,57 @@ import type { Page } from '../src';
 
 // Test that we can add custom methods to the Resource
 describe('Scenario: "custom methods"', () => {
-  class Pokemon {
-    id: ?number;
-    name: string;
-    types: Array<string>;
+  let Pokemon;
 
-    save: () => Promise<Pokemon>;
-    remove: () => Promise<Pokemon>;
+  // Make sure each test can get a completely new class
+  function makePokemonClass() {
+    return class Pokemon {
+      id: ?number;
+      name: string;
+      types: Array<string>;
 
-    static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
-    static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
-    static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
+      save: () => Promise<Pokemon>;
+      remove: () => Promise<Pokemon>;
 
-    // Add custom instance method
-    evolutions() {
-      if (this.id) {
-        return get(`api/pokemon/${this.id}/evolutions`).then((list: any) => {
+      static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
+      static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
+      static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
+
+      // Add custom instance method
+      evolutions() {
+        if (this.id) {
+          return get(`api/pokemon/${this.id}/evolutions`).then((list: any) => {
+            return list.map((properties: JSON) => {
+              return makeInstance(Pokemon, properties);
+            });
+          });
+        }
+      }
+
+      // Add custom static method
+      static evolutions(id: number) {
+        return get(`api/pokemon/${id}/evolutions`).then((list: any) => {
           return list.map((properties: JSON) => {
             return makeInstance(Pokemon, properties);
           });
         });
       }
-    }
 
-    // Add custom static method
-    static evolutions(id: number) {
-      return get(`api/pokemon/${id}/evolutions`).then((list: any) => {
-        return list.map((properties: JSON) => {
-          return makeInstance(Pokemon, properties);
-        });
-      });
-    }
-
-    get firstType(): ?string {
-      if (this.types.length > 0) {
-        return this.types[0];
+      get firstType(): ?string {
+        if (this.types.length > 0) {
+          return this.types[0];
+        }
       }
     }
   }
-
+  
   beforeEach(() => {
     configureMadConnect({
       fetch: undefined,
       middleware: [middleware.checkStatus, middleware.parseJSON]
     });
+
+    Pokemon = makePokemonClass();
 
     makeResource(Pokemon, 'api/pokemon');
 
@@ -152,80 +159,195 @@ describe('Scenario: "custom methods"', () => {
 
 // Test that we can override methods of the Resource
 describe('Scenario: "override methods"', () => {
-  class Pokemon {
-    id: ?number;
-    name: string;
-    types: Array<string>;
+  describe('instance methods', () => {
+    test('save', async(done) => {
+      class Pokemon {
+        id: ?number;
+        name: string;
+        types: Array<string>;
 
-    save: () => Promise<Pokemon>;
-    remove: () => Promise<Pokemon>;
+        // override instance method
+        save(): Promise<Pokemon> {
+          if (this.id) {
+            this.id = 42;
+            return Promise.resolve(this);
+          } else {
+            return Promise.resolve(this);
+          }
+        }
 
-    static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
-    static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
-    static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
-  }
+        remove: () => Promise<Pokemon>;
 
-  beforeEach(() => {  
-     makeResource(Pokemon, 'api/pokemon');
-  });
-
-  test('instance method', async(done) => {
-    // override instance method
-    Pokemon.prototype.save = function() {
-      if (this.id) {
-        this.id = 42;
-        return Promise.resolve(this);
-      } else {
-        return Promise.resolve(this);
+        static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
+        static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
+        static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
       }
-    };
 
-    const pokemon: Pokemon = new Pokemon();
-    pokemon.id = 1;
-    pokemon.name = 'bulbasaur';
-    pokemon.types = ['poison', 'grass'];
+      makeResource(Pokemon, 'api/pokemon');
 
-    const p = await pokemon.save();
-    expect(p.id).toBe(42);
+      const pokemon: Pokemon = new Pokemon();
+      pokemon.id = 1;
+      pokemon.name = 'bulbasaur';
+      pokemon.types = ['poison', 'grass'];
 
-    done();
+      const p = await pokemon.save();
+      expect(p.id).toBe(42);
+
+      done();
+    });
+
+    test('remove', async(done) => {
+      class Pokemon {
+        id: ?number;
+        name: string;
+        types: Array<string>;
+
+        save: () => Promise<Pokemon>;
+
+        // override instance method
+        remove(): Promise<Pokemon> {
+          if (this.id) {
+            this.id = 42;
+            return Promise.resolve(this);
+          } else {
+            return Promise.resolve(this);
+          }
+        }
+
+        static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
+        static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
+        static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
+      }
+
+      makeResource(Pokemon, 'api/pokemon');
+
+      const pokemon: Pokemon = new Pokemon();
+      pokemon.id = 1;
+      pokemon.name = 'bulbasaur';
+      pokemon.types = ['poison', 'grass'];
+
+      const p = await pokemon.remove();
+      expect(p.id).toBe(42);
+
+      done();
+    });
   });
 
-  test('static method', async(done) => {
-    // override instance method
-    Pokemon.one = function(id: number) {
-      const p = new Pokemon();
-      p.id = 1337;
-      return Promise.resolve(p);
-    };
+  describe('static methods', () => {
+    test('one', async(done) => {
+      class Pokemon {
+        id: ?number;
+        name: string;
+        types: Array<string>;
 
-    const p = await Pokemon.one(1);
-    expect(p.id).toBe(1337);
+        save: () => Promise<Pokemon>;
+        remove: () => Promise<Pokemon>;
 
-    done();
+        // override static method
+        static one(id: number, queryParams: ?Object): Promise<Pokemon> {
+          const p = new Pokemon();
+          p.id = 1337;
+          return Promise.resolve(p);
+        }
+
+        static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
+        static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
+      }
+
+      makeResource(Pokemon, 'api/pokemon');
+
+      const p = await Pokemon.one(1);
+      expect(p.id).toBe(1337);
+
+      done();
+    });
+
+    test('list', async(done) => {
+      class Pokemon {
+        id: ?number;
+        name: string;
+        types: Array<string>;
+
+        save: () => Promise<Pokemon>;
+        remove: () => Promise<Pokemon>;
+
+        static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
+
+        // override static method
+        static list(queryParams: ?Object): Promise<Pokemon> {
+          const p = new Pokemon();
+          p.id = 1337;
+          return Promise.resolve(p);
+        }
+
+        static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
+      }
+
+      makeResource(Pokemon, 'api/pokemon');
+
+      const p = await Pokemon.list();
+      expect(p.id).toBe(1337);
+
+      done();
+    });
+
+    test('page', async(done) => {
+      class Pokemon {
+        id: ?number;
+        name: string;
+        types: Array<string>;
+
+        save: () => Promise<Pokemon>;
+        remove: () => Promise<Pokemon>;
+
+        static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
+        static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
+        
+        // override static method
+        static page(queryParams: ?Object): Promise<Pokemon> {
+          const p = new Pokemon();
+          p.id = 1337;
+          return Promise.resolve(p);
+        }
+      }
+
+      makeResource(Pokemon, 'api/pokemon');
+
+      const p = await Pokemon.page();
+      expect(p.id).toBe(1337);
+
+      done();
+    });
   });
 });
 
 // Test that we can extend methods of the Resource
 describe('Scenario: "extend methods"', () => {
-  class Pokemon {
-    id: ?number;
-    name: string;
-    types: Array<string>;
+  let Pokemon;
 
-    save: () => Promise<Pokemon>;
-    remove: () => Promise<Pokemon>;
+  // Make sure each test can get a completely new class
+  function makePokemonClass() {
+    return class Pokemon {
+      id: ?number;
+      name: string;
+      types: Array<string>;
 
-    static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
-    static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
-    static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
-  }
+      save: () => Promise<Pokemon>;
+      remove: () => Promise<Pokemon>;
+
+      static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
+      static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
+      static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
+    }
+  };
 
   beforeEach(() => {
     configureMadConnect({
       fetch: undefined,
       middleware: [middleware.checkStatus, middleware.parseJSON]
     });
+
+    Pokemon = makePokemonClass();
 
     makeResource(Pokemon, 'api/pokemon');
   });
@@ -385,7 +507,6 @@ test('Scenario: "custom error middleware"', async(done) => {
     expect(showError).toHaveBeenCalledWith('Bad Request');
 
     expect()
-
 
     fetchMock.restore();
     done();

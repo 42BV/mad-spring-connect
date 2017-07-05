@@ -44,36 +44,36 @@ export interface Resource<T> {
 }
 ```
 
-Lets say we have a simple Domain Entity called Pokemon which implements the Resource Interface.
+Lets say we want to define a Pokemon resource, we do this like so:
 
 ```js
+// @flow
+
+import { makeResource } from 'mad-spring-connect';
+import type { Page } from 'mad-spring-connect';
+
 class Pokemon {
+  // These are the properties of the pokemon
   id: ?number;
   name: string;
   types: Array<string>;
 
+  /* 
+    These just define the 'shapes' but provide no actual implementation.
+    You will need these definitions to make flow happy.
+  */
   save: () => Promise<Pokemon>;
   remove: () => Promise<Pokemon>;
-
+  
   static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
   static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
   static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
-
-  get primaryType(): ?string {
-    if (this.types.length > 1) {
-      return this.types[0];
-    } else {
-      return undefined;
-    }
-  }
 }
-```
 
-We want to turn this into a Resource, we do this like so:
-
-```js
-import { makeResource } from 'mad-spring-connect';
-
+/* 
+  This is where the magic happens, here the Pokemon 
+  class is turned into a Resource.
+*/
 makeResource(Pokemon, 'api/pokemon');
 
 export default Pokemon;
@@ -197,7 +197,120 @@ class Pokemon {
 }
 ```
 
-The trick here is that you can use the ***get*** function and the ***makeInstance*** functions, which are the same building blocks for this library, to create your own custom methods.
+The trick here is that you can use the ***get*** function and the ***makeInstance*** function. 
+These functions are the same building blocks ***makeResource*** uses under
+the hood. 
+
+See the [Utils](https://42bv.github.io/mad-spring-connect/#utils) section for more helper functions.
+You should always use these functions to help you extend your resource.
+
+### Overriding methods on Pokemon
+
+Sometimes you will find that the default implementations do not match
+your domain. For example there might be a difference between an Entity
+in a List / Page or when it is retrieved alone.
+
+In these cases you need to override ***makeResource*** and provide
+your own custom implementations. ***makeResource*** will never
+override a method if it already exists.
+
+#### Overriding instance methods
+
+You can override `save` and `remove` by simply defining them.
+
+This example defines its own custom `save` implementation:
+
+```js
+// @flow
+
+import { makeResource, post, put } from 'mad-spring-connect';
+import type { Page } from 'mad-spring-connect';
+import { merge } from 'lodash';
+
+const baseUrl = 'api/pokemon';
+
+class Pokemon {
+  id: ?number;
+  name: string;
+  types: Array<string>;
+
+  /*
+    Here we provide a custom implementation, which always creates
+    a new pokemon, and never updates one.
+  */
+  save(): Promise<Pokemon> {
+    return post(baseUrl, this).then((json: any) => {
+      return merge(this, json);
+    });
+  }
+
+  remove: () => Promise<Pokemon>;
+  
+  static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
+  static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
+  static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
+}
+
+// makeResource will ignore 'save' now and will keep our definition.
+makeResource(Pokemon, baseUrl);
+
+export default Pokemon;
+```
+
+#### Overriding static methods
+
+You can override `one`, `list` and `page` by simply defining them.
+
+This example defines its own custom `one` implementation:
+
+```js
+// @flow
+
+import { makeResource, get } from 'mad-spring-connect';
+import type { Page } from 'mad-spring-connect';
+
+const baseUrl = 'api/pokemon';
+
+// When a single pokemon is retrieved it contains more info.
+export type SinglePokemon = {
+  id: ?number,
+  trainer: number,
+  name: string,
+  types: Array<string>,
+  weakness: Array<string>,
+  stats: {
+    speed: number,
+    hp: number,
+    defence: number,
+    attack: number
+  }
+};
+
+class Pokemon {
+  id: ?number;
+  name: string;
+  types: Array<string>;
+
+  save: () => Promise<Pokemon>;
+  remove: () => Promise<Pokemon>;
+
+  /* 
+    Here we provide a custom implementation, which return a SinglePokemon
+    instead of a Pokemon.
+  */
+  static one(id: number, queryParams: ?Object): Promise<SinglePokemon> {
+    return get(`${baseUrl}/${id}`, queryParams);
+  }
+ 
+  static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
+  static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
+}
+
+// makeResource will ignore 'one' now and will keep our definition.
+makeResource(Pokemon, baseUrl);
+
+export default Pokemon;
+```
 
 ## Utils
 
