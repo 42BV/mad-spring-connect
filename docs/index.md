@@ -266,47 +266,47 @@ This example defines its own custom `one` implementation:
 ```js
 // @flow
 
-import { makeResource, get } from 'mad-spring-connect';
+import { makeResource, get, makeInstance } from 'mad-spring-connect';
 import type { Page } from 'mad-spring-connect';
 
 const baseUrl = 'api/pokemon';
 
-// When a single pokemon is retrieved it contains more info.
-export type SinglePokemon = {
+// When a pokemon is retrieved in a page it has less info.
+export type PagePokemon = {
   id: ?number,
-  trainer: number,
   name: string,
-  types: Array<string>,
-  weakness: Array<string>,
+};
+
+class Pokemon {
+  id: ?number;
+  trainer: number;
+  name: string;
+  types: Array<string>;
+  weakness: Array<string>;
   stats: {
     speed: number,
     hp: number,
     defence: number,
     attack: number
-  }
-};
-
-class Pokemon {
-  id: ?number;
-  name: string;
-  types: Array<string>;
+  };
 
   save: () => Promise<Pokemon>;
   remove: () => Promise<Pokemon>;
 
+  
+  static one(id: number, queryParams: ?Object): Promise<Pokemon>;
+  static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
+
   /* 
-    Here we provide a custom implementation, which return a SinglePokemon
+    Here we provide a custom implementation, which return a PagePokemon
     instead of a Pokemon.
   */
-  static one(id: number, queryParams: ?Object): Promise<SinglePokemon> {
-    return get(`${baseUrl}/${id}`, queryParams);
+  static page(queryParams: ?Object): Promise<Page<PagePokemon>>; {
+    return get(baseUrl, queryParams);
   }
- 
-  static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
-  static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
 }
 
-// makeResource will ignore 'one' now and will keep our definition.
+// makeResource will ignore 'page' now and will keep our definition.
 makeResource(Pokemon, baseUrl);
 
 export default Pokemon;
