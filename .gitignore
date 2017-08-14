@@ -20,3 +20,7 @@ yarn-error.log*
 # Docs
 /docs/_site
 /docs/.sass-cache
+
+# IDE
+/.idea
+*.iml
