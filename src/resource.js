@@ -101,7 +101,7 @@ function makeSave<T: { id: ?number }>(DomainClass: Class<T>, baseUrl: string): (
         return merge(this, json);
       });
     } else {
-      return post(`api/pokemon`, this).then((json: any) => {
+      return post(`${baseUrl}`, this).then((json: any) => {
         return merge(this, json);
       });
     }
