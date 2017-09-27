@@ -22,7 +22,7 @@ import { makeInstance } from './utils';
  * @template T Represents a Domain Entity.
  */
 export interface Resource<T> {
-  id: ?number;
+  id: number;
   
   save(): Promise<T>;
   remove(): Promise<T>;
