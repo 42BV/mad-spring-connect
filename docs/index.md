@@ -33,7 +33,7 @@ which implements the following interface:
 
 ```js
 export interface Resource<T> {
-  id: ?number;
+  id: number;
   
   save(): Promise<T>;
   remove(): Promise<T>;
@@ -54,7 +54,7 @@ import type { Page } from 'mad-spring-connect';
 
 class Pokemon {
   // These are the properties of the pokemon
-  id: ?number;
+  id: number;
   name: string;
   types: Array<string>;
 
@@ -201,6 +201,10 @@ The trick here is that you can use the ***get*** function and the ***makeInstanc
 These functions are the same building blocks ***makeResource*** uses under
 the hood. 
 
+Note: ***makeInstance*** converts the response to actual Pokemon objects.
+Without ***makeInstance*** you could not use the instance methods such
+as `save` and `remove`.
+
 See the [Utils](https://42bv.github.io/mad-spring-connect/#utils) section for more helper functions.
 You should always use these functions to help you extend your resource.
 
@@ -230,7 +234,7 @@ import { merge } from 'lodash';
 const baseUrl = 'api/pokemon';
 
 class Pokemon {
-  id: ?number;
+  id: number;
   name: string;
   types: Array<string>;
 
@@ -273,12 +277,12 @@ const baseUrl = 'api/pokemon';
 
 // When a pokemon is retrieved in a page it has less info.
 export type PagePokemon = {
-  id: ?number,
+  id: number,
   name: string,
 };
 
 class Pokemon {
-  id: ?number;
+  id: number;
   trainer: number;
   name: string;
   types: Array<string>;
@@ -396,8 +400,8 @@ For example:
 import { makeInstance } from 'mad-spring-connect';
 
 class Person {
-  id: ?number;
-  name: ?string;
+  id: number;
+  name: string;
 }
 
 test('makeInstance', () => {
@@ -473,8 +477,23 @@ export function checkStatus(promise: Promise<Response>): Promise<Response> {
 }
 
 // The second default middleware
-export function parseJSON(promise: Promise<Response>): Promise<JSON> {
+export function parseJSON(promise: Promise<Response>): Promise<any> {
   return promise.then((response: Response) => {
+    if (response.status === 204) {
+      return Promise.resolve({});
+    }
+
+    const contentType = response.headers.get('Content-Type');
+
+    if (
+      contentType === null ||
+      contentType.includes('application/json') === false
+    ) {
+      throw new Error(
+        'mad-spring-connect: Content-Type is not application/json will not parse.'
+      );
+    }
+
     return response.json();
   });
 }

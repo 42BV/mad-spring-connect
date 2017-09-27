@@ -11,7 +11,7 @@ import { makeResource } from '../src/resource';
 import type { Page } from '../src/spring-models';
 
 class Pokemon {
-  id: ?number;
+  id: number;
   name: string;
   types: Array<string>;
 
