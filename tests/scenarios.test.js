@@ -55,9 +55,9 @@ describe('Scenario: "custom methods"', () => {
           return this.types[0];
         }
       }
-    }
+    };
   }
-  
+
   beforeEach(() => {
     configureMadConnect({
       fetch: undefined,
@@ -68,21 +68,26 @@ describe('Scenario: "custom methods"', () => {
 
     makeResource(Pokemon, 'api/pokemon');
 
-    const response = [
-      { 
-        id: 1, 
-        name: 'bulbasaur', 
-        types: ['poison', 'grass'] 
-      }, { 
-        id: 2, 
-        name: 'ivysaur', 
-        types: ['grass'] 
-      }, { 
-        id: 3, 
-        name: 'venusaur', 
-        types: ['grass', 'poison'] 
-      },
-    ];
+    const response = {
+      headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      body: [
+        {
+          id: 1,
+          name: 'bulbasaur',
+          types: ['poison', 'grass']
+        },
+        {
+          id: 2,
+          name: 'ivysaur',
+          types: ['grass']
+        },
+        {
+          id: 3,
+          name: 'venusaur',
+          types: ['grass', 'poison']
+        }
+      ]
+    };
     fetchMock.get('api/pokemon/1/evolutions', response);
   });
 
@@ -90,7 +95,7 @@ describe('Scenario: "custom methods"', () => {
     fetchMock.restore();
   });
 
-  test('instance method', async(done) => {
+  test('instance method', async done => {
     const pokemon: Pokemon = new Pokemon();
     pokemon.id = 1;
 
@@ -120,7 +125,7 @@ describe('Scenario: "custom methods"', () => {
     }
   });
 
-  test('static method', async(done) => {
+  test('static method', async done => {
     const pokemonList = await Pokemon.evolutions(1);
 
     expect(pokemonList.length).toBe(3);
@@ -160,7 +165,7 @@ describe('Scenario: "custom methods"', () => {
 // Test that we can override methods of the Resource
 describe('Scenario: "override methods"', () => {
   describe('instance methods', () => {
-    test('save', async(done) => {
+    test('save', async done => {
       class Pokemon {
         id: ?number;
         name: string;
@@ -196,7 +201,7 @@ describe('Scenario: "override methods"', () => {
       done();
     });
 
-    test('remove', async(done) => {
+    test('remove', async done => {
       class Pokemon {
         id: ?number;
         name: string;
@@ -234,7 +239,7 @@ describe('Scenario: "override methods"', () => {
   });
 
   describe('static methods', () => {
-    test('one', async(done) => {
+    test('one', async done => {
       class Pokemon {
         id: ?number;
         name: string;
@@ -262,7 +267,7 @@ describe('Scenario: "override methods"', () => {
       done();
     });
 
-    test('list', async(done) => {
+    test('list', async done => {
       class Pokemon {
         id: ?number;
         name: string;
@@ -291,7 +296,7 @@ describe('Scenario: "override methods"', () => {
       done();
     });
 
-    test('page', async(done) => {
+    test('page', async done => {
       class Pokemon {
         id: ?number;
         name: string;
@@ -302,7 +307,7 @@ describe('Scenario: "override methods"', () => {
 
         static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
         static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
-        
+
         // override static method
         static page(queryParams: ?Object): Promise<Pokemon> {
           const p = new Pokemon();
@@ -338,8 +343,8 @@ describe('Scenario: "extend methods"', () => {
       static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
       static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
       static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
-    }
-  };
+    };
+  }
 
   beforeEach(() => {
     configureMadConnect({
@@ -356,21 +361,24 @@ describe('Scenario: "extend methods"', () => {
     fetchMock.restore();
   });
 
-  test('instance method', async(done) => {
+  test('instance method', async done => {
     // extend instance method
     const originalSave = Pokemon.prototype.save;
 
     Pokemon.prototype.save = function() {
-      return originalSave.apply(this).then((pokemon) => {
+      return originalSave.apply(this).then(pokemon => {
         pokemon.id = 1337;
         return pokemon;
       });
     };
 
-    const response = { 
-      id: 1, 
-      name: 'bulbasaur', 
-      types: ['poison', 'grass']
+    const response = {
+      headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      body: {
+        id: 1,
+        name: 'bulbasaur',
+        types: ['poison', 'grass']
+      }
     };
 
     fetchMock.put('api/pokemon/1', response);
@@ -387,21 +395,24 @@ describe('Scenario: "extend methods"', () => {
     done();
   });
 
-  test('static method', async(done) => {
+  test('static method', async done => {
     const originalOne = Pokemon.one;
 
     // extend instance method
     Pokemon.one = function(...args) {
-      return originalOne(...args).then((pokemon) => {
+      return originalOne(...args).then(pokemon => {
         pokemon.id = 42;
         return pokemon;
       });
     };
 
-    const response = { 
-      id: 1, 
-      name: 'bulbasaur', 
-      types: ['poison', 'grass']
+    const response = {
+      headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      body: {
+        id: 1,
+        name: 'bulbasaur',
+        types: ['poison', 'grass']
+      }
     };
 
     fetchMock.get('api/pokemon/1', response);
@@ -414,7 +425,7 @@ describe('Scenario: "extend methods"', () => {
 });
 
 // Test that we can override middleware
-test('Scenario: "custom success middleware"', async (done) => {
+test('Scenario: "custom success middleware"', async done => {
   let finished = false;
 
   class Pokemon {
@@ -431,16 +442,18 @@ test('Scenario: "custom success middleware"', async (done) => {
   }
 
   function customMiddleware(promise) {
-    return promise.then((response) => {
-      return response.json();
-    }).then((envelope) => {
-      if (envelope.statusCode === 200) {
-        finished = true;
-        return envelope.data;
-      } else {
-        return envelope.error;
-      }
-    });
+    return promise
+      .then(response => {
+        return response.json();
+      })
+      .then(envelope => {
+        if (envelope.statusCode === 200) {
+          finished = true;
+          return envelope.data;
+        } else {
+          return envelope.error;
+        }
+      });
   }
 
   configureMadConnect({
@@ -468,7 +481,7 @@ test('Scenario: "custom success middleware"', async (done) => {
 });
 
 // Test that we can override middleware
-test('Scenario: "custom error middleware"', async(done) => {
+test('Scenario: "custom error middleware"', async done => {
   class Pokemon {
     id: ?number;
     name: string;
@@ -485,10 +498,10 @@ test('Scenario: "custom error middleware"', async(done) => {
   const showError = jest.fn();
 
   function customMiddleware(promise) {
-    return promise.catch((error) => {
+    return promise.catch(error => {
       showError(error.message);
       return Promise.reject(error);
-    }); 
+    });
   }
 
   configureMadConnect({
@@ -497,16 +510,16 @@ test('Scenario: "custom error middleware"', async(done) => {
   });
 
   makeResource(Pokemon, 'api/pokemon');
-  
+
   fetchMock.get('api/pokemon/1', { status: 400 });
 
   try {
-     await Pokemon.one(1);
-  } catch(error) {
+    await Pokemon.one(1);
+  } catch (error) {
     expect(showError).toHaveBeenCalledTimes(1);
     expect(showError).toHaveBeenCalledWith('Bad Request');
 
-    expect()
+    expect();
 
     fetchMock.restore();
     done();
