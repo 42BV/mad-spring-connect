@@ -1,5 +1,6 @@
 [ignore]
 .*/lib/.*
+.*node_modules/kefir.*
 
 [include]
 /flow-typed/

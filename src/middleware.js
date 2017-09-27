@@ -25,7 +25,7 @@
  * } 
  * ```
  */
-export type Middleware = (Promise<*>) => Promise<*>
+export type Middleware = (Promise<*>) => Promise<*>;
 
 /**
  * Represents an error which arose from handling a Response.
@@ -61,7 +61,7 @@ export class ErrorWithResponse extends Error {
 export function checkStatus(promise: Promise<Response>): Promise<Response> {
   return promise.then((response: Response) => {
     const status = response.status;
-    
+
     if (status >= 200 && status <= 299) {
       return response;
     } else {
@@ -74,12 +74,33 @@ export function checkStatus(promise: Promise<Response>): Promise<Response> {
  * Takes a Promise which resolves to a Response and returns a Promise
  * which resolves to the JSON representation of the Response.
  * 
+ * If the response has a 204 No Content no response is parsed and instead
+ * a Promise which resolves to an empty object is returned.
+ * 
+ * Throws an error when the json cannot be parsed, or when the Content-Type
+ * does not include application/json.
+ * 
  * @param {Promise<Response>} Promise resolving to a Response
- * @return {Promise<JSON>} the JSON representation of the response body.
+ * @return {Promise<any>} the JSON representation of the response body.
  * @throws {Error} An Error indicating that the JSON could not be parsed. 
  */
-export function parseJSON(promise: Promise<Response>): Promise<JSON> {
+export function parseJSON(promise: Promise<Response>): Promise<any> {
   return promise.then((response: Response) => {
+    if (response.status === 204) {
+      return Promise.resolve({});
+    }
+
+    const contentType = response.headers.get('Content-Type');
+
+    if (
+      contentType === null ||
+      contentType.includes('application/json') === false
+    ) {
+      throw new Error(
+        'mad-spring-connect: Content-Type is not application/json will not parse.'
+      );
+    }
+
     return response.json();
   });
 }
