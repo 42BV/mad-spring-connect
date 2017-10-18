@@ -94,10 +94,10 @@ export function parseJSON(promise: Promise<Response>): Promise<any> {
 
     if (
       contentType === null ||
-      contentType.includes('application/json') === false
+      contentType.includes('json') === false
     ) {
       throw new Error(
-        'mad-spring-connect: Content-Type is not application/json will not parse.'
+        'mad-spring-connect: Content-Type is not json, will not parse.'
       );
     }
 

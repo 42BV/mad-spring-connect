@@ -45,10 +45,30 @@ describe('checkStatus', () => {
 });
 
 describe('parseJSON', () => {
-  test('200', done => {
+  test('200 with Content-Type application/json', done => {
     const headers = new Headers({
       'Content-Length': 42,
       'Content-Type': 'application/json;charset=UTF-8'
+    });
+    const response = new Response(`{ "number": 42 }`, { status: 200, headers });
+
+    const promise = parseJSON(Promise.resolve(response));
+
+    promise
+      .then(json => {
+        expect(json.number).toBe(42);
+
+        done();
+      })
+      .catch(() => {
+        fail();
+      });
+  });
+
+  test('200 with Content-Type application/vnd.spring-boot.actuator.v1+json', done => {
+    const headers = new Headers({
+      'Content-Length': 42,
+      'Content-Type': 'application/vnd.spring-boot.actuator.v1+json;charset=UTF-8'
     });
     const response = new Response(`{ "number": 42 }`, { status: 200, headers });
 
@@ -80,7 +100,7 @@ describe('parseJSON', () => {
       })
       .catch(e => {
         expect(e.message).toBe(
-          'mad-spring-connect: Content-Type is not application/json will not parse.'
+          'mad-spring-connect: Content-Type is not json, will not parse.'
         );
         done();
       });
@@ -98,7 +118,7 @@ describe('parseJSON', () => {
       })
       .catch(e => {
         expect(e.message).toBe(
-          'mad-spring-connect: Content-Type is not application/json will not parse.'
+          'mad-spring-connect: Content-Type is not json, will not parse.'
         );
         done();
       });
