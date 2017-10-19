@@ -1,6 +1,6 @@
 {
   "name": "mad-spring-connect",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Connecting with a Spring REST APIs in a domain friendly manner",
   "files": [
     "lib"
