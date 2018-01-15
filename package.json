@@ -1,6 +1,6 @@
 {
   "name": "mad-spring-connect",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "description": "Connecting with a Spring REST APIs in a domain friendly manner",
   "files": [
     "lib"
@@ -48,7 +48,7 @@
   },
   "scripts": {
     "start": "jest test --watch",
-    "test": "npm run flow -- version && npm run flow && jest test --coverage",
+    "test": "npm run flow && jest test --coverage",
     "flow": "flow version && flow",
     "prepublish": "rm -rf lib && npm test && npm run babel-prepublish && npm run flow-prepublish",
     "babel-prepublish": "babel src/ -d lib",
