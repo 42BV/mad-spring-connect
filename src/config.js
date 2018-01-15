@@ -15,7 +15,7 @@ let config: Config = {
 };
 
 /**
- * Configures the MadConnect libary.
+ * Configures the MadConnect library.
  *
  * @param {Config} The new configuration
  */
@@ -33,7 +33,7 @@ export function getConfig(): Config {
 }
 
 /**
- * Convienence function to return 'fetch' from the config.
+ * Convenience function to return 'fetch' from the config.
  * 
  * Returns either a custom fetch implementation provider by
  * the user via 'configureMadConnect' or the default fetch
@@ -47,7 +47,7 @@ export function getFetch(): typeof fetch {
 }
 
 /**
- * Convienence function to return the 'middleware' from the config.
+ * Convenience function to return the 'middleware' from the config.
  * 
  * @export
  * @returns {Array<Middleware>} The currently configured middleware
