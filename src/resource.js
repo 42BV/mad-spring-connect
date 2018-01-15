@@ -26,10 +26,12 @@ export interface Resource<T> {
   
   save(): Promise<T>;
   remove(): Promise<T>;
+}
 
-  static one(id: number, queryParams: ?Object): Promise<T>;
-  static list(queryParams: ?Object): Promise<Array<T>>;
-  static page(queryParams: ?Object): Promise<Page<T>>;
+export type StaticResource<T> = {
+  one(id: number, queryParams: ?Object): Promise<T>;
+  list(queryParams: ?Object): Promise<Array<T>>;
+  page(queryParams: ?Object): Promise<Page<T>>;
 }
 
 /**
@@ -38,7 +40,7 @@ export interface Resource<T> {
  * interface.
  * 
  * Adds the following instance methods: `save` and `remove`.
- * Adds the following static methdos: `one`, `list` and `page`.
+ * Adds the following static methods: `one`, `list` and `page`.
  * 
  * It will not override instance, and static method if they are
  * already defined.
@@ -46,7 +48,7 @@ export interface Resource<T> {
  * @example
  * ```js
  * class Pokemon {
- *   id: ?number;
+ *   id: number;
  *   name: string;
  *   types: Array<string>;
  * }
@@ -58,7 +60,7 @@ export interface Resource<T> {
  * @param { Class<T : { id: ?number }> } DomainClass A class definition representing a domain entity. The entity must have an id field.
  * @param {string} baseUrl The part of the url which is constant, for example 'api/pokemon/';
  */
-export function makeResource<T>(DomainClass: *, baseUrl: string) {
+export function makeResource<T>(DomainClass: *, baseUrl: string): Resource<T> & StaticResource<T> {
   if (DomainClass.prototype.save === undefined) {
     DomainClass.prototype.save = makeSave(DomainClass, baseUrl);
   }
@@ -78,6 +80,8 @@ export function makeResource<T>(DomainClass: *, baseUrl: string) {
   if (DomainClass.page === undefined) {
     DomainClass.page = makePage(DomainClass, baseUrl);
   }
+
+  return DomainClass;
 }
 
 function makeSave<T: { id: ?number }>(DomainClass: Class<T>, baseUrl: string): () => Promise<T> {
