@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.0.1] - 2018-02-12
+
 ### Fixed
 - Fixed a bug which caused the `emptyPage` from the spring-models not
 to be recognized as being of type Page<T>. This caused flow errors when
