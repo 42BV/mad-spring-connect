@@ -19,7 +19,7 @@ export type Page<T> = {
  * Represents an empty Page useful for initializing variables while
  * waiting for the actual Page to be retrieved.
  */
-export const emptyPage = Object.freeze({
+export const emptyPage: Page<*> = Object.freeze({
   content: [],
   last: true,
   totalElements: 0,
