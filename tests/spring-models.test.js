@@ -41,10 +41,10 @@ makeResource(Bicycle, 'api/bicycle');
 */
 describe('emptyPage', () => {
   it('should understand that emptyPage is of type Page<T>', () => {
-    const pokemonPage: Page<Pokemon> = emptyPage;
-    const bicyclePage: Page<Bicycle> = emptyPage;
+    const pokemonPage: Page<Pokemon> = emptyPage();
+    const bicyclePage: Page<Bicycle> = emptyPage();
 
-    const bicycleContent: Array<Bicycle> = emptyPage.content;
-    const pokemonContent: Array<Pokemon> = emptyPage.content;
+    const bicycleContent: Array<Bicycle> = emptyPage().content;
+    const pokemonContent: Array<Pokemon> = emptyPage().content;
   });
 });
