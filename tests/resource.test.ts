@@ -1,35 +1,20 @@
-// @flow
-
 import fetchMock from 'fetch-mock';
-
-import * as middleware from '../src/middleware';
-
 import { configureMadConnect } from '../src/config';
-
+import * as middleware from '../src/middleware';
 import { makeResource } from '../src/resource';
+import { Page } from '../src/spring-models';
 
-import type { Page } from '../src/spring-models';
-
-class Pokemon {
-  id: number;
-  name: string;
-  types: Array<string>;
-
-  save: () => Promise<Pokemon>;
-  remove: () => Promise<Pokemon>;
-
-  static one: (id: number, queryParams: ?Object) => Promise<Pokemon>;
-  static list: (queryParams: ?Object) => Promise<Array<Pokemon>>;
-  static page: (queryParams: ?Object) => Promise<Page<Pokemon>>;
+class Pokemon extends makeResource('api/pokemon')<Pokemon> {
+  public id?: number;
+  public name!: string;
+  public types!: string[];
 }
 
-makeResource(Pokemon, 'api/pokemon');
-
-describe('makeResource', () => {
+describe('Resource', () => {
   beforeEach(() => {
     configureMadConnect({
       fetch: undefined,
-      middleware: [middleware.checkStatus, middleware.parseJSON]
+      middleware: [middleware.checkStatus, middleware.parseJSON],
     });
   });
 
@@ -43,29 +28,28 @@ describe('makeResource', () => {
         body: {
           id: 1,
           name: 'bulbasaur',
-          types: ['poison', 'grass']
+          types: ['poison', 'grass'],
         },
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       };
 
       fetchMock.post('api/pokemon', response);
 
-      const pokemon: Pokemon = new Pokemon();
+      let pokemon: Pokemon = new Pokemon();
 
       pokemon.name = 'bulbasaur';
       pokemon.types = ['poison', 'grass'];
 
-      const p = await pokemon.save();
+      await pokemon.save();
 
       expect(pokemon instanceof Pokemon).toBe(true);
       expect(pokemon.id).toBe(1);
       expect(pokemon.name).toBe('bulbasaur');
       expect(pokemon.types).toEqual(['poison', 'grass']);
 
-      const fetchOptions = fetchMock.lastOptions();
-      expect(fetchOptions.body).toBe(
-        `{"name":"bulbasaur","types":["poison","grass"]}`
-      );
+      // @ts-ignore
+      const { body } = fetchMock.lastOptions();
+      expect(body).toBe(`{"name":"bulbasaur","types":["poison","grass"]}`);
 
       done();
     });
@@ -75,9 +59,9 @@ describe('makeResource', () => {
         body: {
           id: 1,
           name: 'bulbasaur',
-          types: ['poison', 'grass']
+          types: ['poison', 'grass'],
         },
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       };
 
       fetchMock.put('api/pokemon/1', response);
@@ -87,17 +71,16 @@ describe('makeResource', () => {
       pokemon.name = 'bulbasaur';
       pokemon.types = ['poison', 'grass'];
 
-      const p = await pokemon.save();
+      await pokemon.save();
 
       expect(pokemon instanceof Pokemon).toBe(true);
       expect(pokemon.id).toBe(1);
       expect(pokemon.name).toBe('bulbasaur');
       expect(pokemon.types).toEqual(['poison', 'grass']);
 
-      const fetchOptions = fetchMock.lastOptions();
-      expect(fetchOptions.body).toBe(
-        `{"id":1,"name":"bulbasaur","types":["poison","grass"]}`
-      );
+      // @ts-ignore
+      const { body } = fetchMock.lastOptions();
+      expect(body).toBe(`{"id":1,"name":"bulbasaur","types":["poison","grass"]}`);
 
       done();
     });
@@ -106,7 +89,7 @@ describe('makeResource', () => {
   describe('remove', () => {
     test('has id', async done => {
       fetchMock.delete('api/pokemon/1', {
-        status: 204
+        status: 204,
       });
 
       const pokemon: Pokemon = new Pokemon();
@@ -115,7 +98,7 @@ describe('makeResource', () => {
       pokemon.name = 'bulbasaur';
       pokemon.types = ['poison', 'grass'];
 
-      const p = await pokemon.remove();
+      await pokemon.remove();
 
       expect(pokemon instanceof Pokemon).toBe(true);
       expect(pokemon.id).toBe(undefined);
@@ -125,17 +108,15 @@ describe('makeResource', () => {
       done();
     });
 
-    test('does not have id', done => {
+    test('does not have id', async done => {
       const pokemon: Pokemon = new Pokemon();
       pokemon.name = 'bulbasaur';
       pokemon.types = ['poison', 'grass'];
 
       try {
-        pokemon.remove();
+        await pokemon.remove();
       } catch (error) {
-        expect(error.message).toBe(
-          'Cannot remove a Resource which has no id, this is a programmer error.'
-        );
+        expect(error.message).toBe('Cannot remove a Resource which has no id, this is a programmer error.');
         done();
       }
     });
@@ -147,14 +128,14 @@ describe('makeResource', () => {
         body: {
           id: 1,
           name: 'bulbasaur',
-          types: ['poison', 'grass']
+          types: ['poison', 'grass'],
         },
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       };
 
       fetchMock.get('api/pokemon/1', response);
 
-      const pokemon = await Pokemon.one(1);
+      const pokemon: Pokemon = await Pokemon.one(1);
 
       expect(pokemon instanceof Pokemon).toBe(true);
       expect(pokemon.id).toBe(1);
@@ -169,14 +150,14 @@ describe('makeResource', () => {
         body: {
           id: 1,
           name: 'bulbasaur',
-          types: ['poison', 'grass']
+          types: ['poison', 'grass'],
         },
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       };
 
       fetchMock.get('api/pokemon/1?number=42', response);
 
-      const pokemon = await Pokemon.one(1, { number: 42 });
+      const pokemon: Pokemon = await Pokemon.one(1, { number: 42 });
 
       expect(pokemon instanceof Pokemon).toBe(true);
       expect(pokemon.id).toBe(1);
@@ -194,25 +175,24 @@ describe('makeResource', () => {
           {
             id: 1,
             name: 'bulbasaur',
-            types: ['poison', 'grass']
+            types: ['poison', 'grass'],
           },
           {
             id: 2,
             name: 'ivysaur',
-            types: ['grass']
+            types: ['grass'],
           },
           {
             id: 3,
             name: 'venusaur',
-            types: ['grass', 'poison']
-          }
+            types: ['grass', 'poison'],
+          },
         ],
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       };
       fetchMock.get('api/pokemon', response);
 
-      const pokemonList = await Pokemon.list();
-
+      const pokemonList: Pokemon[] = await Pokemon.list();
       expect(pokemonList.length).toBe(3);
 
       const [bulbasaur, ivysaur, venusaur] = pokemonList;
@@ -241,25 +221,24 @@ describe('makeResource', () => {
           {
             id: 1,
             name: 'bulbasaur',
-            types: ['poison', 'grass']
+            types: ['poison', 'grass'],
           },
           {
             id: 2,
             name: 'ivysaur',
-            types: ['grass']
+            types: ['grass'],
           },
           {
             id: 3,
             name: 'venusaur',
-            types: ['grass', 'poison']
-          }
+            types: ['grass', 'poison'],
+          },
         ],
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       };
       fetchMock.get('api/pokemon?filter=true', response);
 
-      const pokemonList = await Pokemon.list({ filter: true });
-
+      const pokemonList: Pokemon[] = await Pokemon.list({ filter: true });
       expect(pokemonList.length).toBe(3);
 
       const [bulbasaur, ivysaur, venusaur] = pokemonList;
@@ -289,18 +268,18 @@ describe('makeResource', () => {
         {
           id: 1,
           name: 'bulbasaur',
-          types: ['poison', 'grass']
+          types: ['poison', 'grass'],
         },
         {
           id: 2,
           name: 'ivysaur',
-          types: ['grass']
+          types: ['grass'],
         },
         {
           id: 3,
           name: 'venusaur',
-          types: ['grass', 'poison']
-        }
+          types: ['grass', 'poison'],
+        },
       ];
 
       const response = {
@@ -312,18 +291,23 @@ describe('makeResource', () => {
           number: 0,
           first: true,
           numberOfElements: 3,
-          content
+          content,
         },
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       };
 
       fetchMock.get('api/pokemon', response);
 
-      const pokemonPage = await Pokemon.page();
+      const pokemonPage: Page<Pokemon[]> = await Pokemon.page();
 
       expect(pokemonPage.content.length).toBe(3);
 
-      const [bulbasaur, ivysaur, venusaur] = pokemonPage.content;
+      // @ts-ignore
+      const bulbasaur: Pokemon = pokemonPage.content[0];
+      // @ts-ignore
+      const ivysaur: Pokemon = pokemonPage.content[1];
+      // @ts-ignore
+      const venusaur: Pokemon = pokemonPage.content[2];
 
       expect(bulbasaur instanceof Pokemon).toBe(true);
       expect(bulbasaur.id).toBe(1);
@@ -348,18 +332,18 @@ describe('makeResource', () => {
         {
           id: 1,
           name: 'bulbasaur',
-          types: ['poison', 'grass']
+          types: ['poison', 'grass'],
         },
         {
           id: 2,
           name: 'ivysaur',
-          types: ['grass']
+          types: ['grass'],
         },
         {
           id: 3,
           name: 'venusaur',
-          types: ['grass', 'poison']
-        }
+          types: ['grass', 'poison'],
+        },
       ];
 
       const response = {
@@ -371,9 +355,9 @@ describe('makeResource', () => {
           number: 0,
           first: true,
           numberOfElements: 3,
-          content
+          content,
         },
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       };
 
       fetchMock.get('api/pokemon?page=1', response);
@@ -382,7 +366,12 @@ describe('makeResource', () => {
 
       expect(pokemonPage.content.length).toBe(3);
 
-      const [bulbasaur, ivysaur, venusaur] = pokemonPage.content;
+      // @ts-ignore
+      const bulbasaur: Pokemon = pokemonPage.content[0];
+      // @ts-ignore
+      const ivysaur: Pokemon = pokemonPage.content[1];
+      // @ts-ignore
+      const venusaur: Pokemon = pokemonPage.content[2];
 
       expect(bulbasaur instanceof Pokemon).toBe(true);
       expect(bulbasaur.id).toBe(1);

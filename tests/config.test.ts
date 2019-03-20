@@ -1,9 +1,7 @@
-
-import { configureMadConnect, getConfig, getFetch, getMiddleware } from '../src/config';
-
+import Config, { configureMadConnect, getConfig, getFetch, getMiddleware } from '../src/config';
 import { checkStatus, parseJSON } from '../src/middleware';
 
-test('configuration lifecycle', () => {
+test('configuration lifecycle', async done => {
   // By default it should use regular old fetch.
   expect(getConfig().fetch).toBe(window.fetch);
   expect(getFetch()).toBe(window.fetch);
@@ -12,9 +10,10 @@ test('configuration lifecycle', () => {
   const fakeFetch = jest.fn();
 
   // Next we initialize the config.
-  const config = {
+  const config: Config = {
     fetch: fakeFetch,
-    middleware: [1, 2, 3]
+    // @ts-ignore
+    middleware: [1, 2, 3],
   };
 
   configureMadConnect(config);
@@ -23,4 +22,5 @@ test('configuration lifecycle', () => {
   expect(getConfig()).toBe(config);
   expect(getFetch()).toBe(fakeFetch);
   expect(getMiddleware()).toEqual([1, 2, 3]);
+  done();
 });
