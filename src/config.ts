@@ -1,17 +1,14 @@
-// @flow
+import Middleware, { checkStatus, parseJSON } from './middleware';
 
-import { checkStatus, parseJSON } from './middleware';
-import type { Middleware } from './middleware';
-
-export type Config = {
+export default interface Config {
   // The fetch variant which is used to make requests.
-  fetch?: typeof fetch,
-  middleware: Array<Middleware>
-};
+  fetch?: typeof fetch;
+  middleware: Middleware[];
+}
 
 let config: Config = {
   fetch: undefined, // By default use fetch as is.
-  middleware: [checkStatus, parseJSON]
+  middleware: [checkStatus, parseJSON],
 };
 
 /**
@@ -19,7 +16,7 @@ let config: Config = {
  *
  * @param {Config} The new configuration
  */
-export function configureMadConnect(c: Config) {
+export function configureMadConnect(c: Config): void {
   config = c;
 }
 
@@ -34,11 +31,11 @@ export function getConfig(): Config {
 
 /**
  * Convenience function to return 'fetch' from the config.
- * 
+ *
  * Returns either a custom fetch implementation provider by
  * the user via 'configureMadConnect' or the default fetch
  * implementation provided by the browser.
- * 
+ *
  * @export
  * @returns {Fetch} Either the default fetch or the configured fetch.
  */
@@ -48,10 +45,10 @@ export function getFetch(): typeof fetch {
 
 /**
  * Convenience function to return the 'middleware' from the config.
- * 
+ *
  * @export
  * @returns {Array<Middleware>} The currently configured middleware
  */
-export function getMiddleware(): Array<Middleware> {
+export function getMiddleware(): Middleware[] {
   return config.middleware;
 }
