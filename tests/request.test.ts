@@ -1,20 +1,21 @@
 import fetchMock from 'fetch-mock';
 
 import * as middleware from '../src/middleware';
-
 import { configureMadConnect } from '../src/config';
-
-import { get, post, put, remove, patch } from '../src/request';
+import { get, post, put, patch, remove } from '../src/request';
 
 // Note that we tests all the requests with the default middleware
 describe('requests', () => {
   beforeEach(() => {
+    // @ts-ignore
     middleware.checkStatus = jest.fn(middleware.checkStatus);
+
+    // @ts-ignore
     middleware.parseJSON = jest.fn(middleware.parseJSON);
 
     configureMadConnect({
       fetch: undefined,
-      middleware: [middleware.checkStatus, middleware.parseJSON]
+      middleware: [middleware.checkStatus, middleware.parseJSON],
     });
   });
 
@@ -29,7 +30,7 @@ describe('requests', () => {
     test('200: without query parameters', async done => {
       fetchMock.get('api/pokemon/1', {
         body: { id: 1 },
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       });
 
       const json = await get('api/pokemon/1');
@@ -41,7 +42,7 @@ describe('requests', () => {
     test('200: with query parameters', async done => {
       fetchMock.get('api/pokemon?page=1', {
         body: { id: 1 },
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       });
 
       const json = await get('api/pokemon', { page: 1 });
@@ -54,7 +55,7 @@ describe('requests', () => {
       fetchMock.get('api/pokemon?page=1', 500);
 
       try {
-        const json = await get('api/pokemon', { page: 1 });
+        await get('api/pokemon', { page: 1 });
         fail();
       } catch (e) {
         expect(e.message).toBe('Internal Server Error');
@@ -67,15 +68,15 @@ describe('requests', () => {
     test('200: parse error', async done => {
       fetchMock.get('api/pokemon?page=1', {
         body: '[]}{}]',
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       });
 
       try {
-        const json = await get('api/pokemon', { page: 1 });
+        await get('api/pokemon', { page: 1 });
         fail();
       } catch (e) {
         expect(e.message).toBe(
-          'invalid json response body at api/pokemon?page=1 reason: Unexpected token } in JSON at position 2'
+          'invalid json response body at /api/pokemon?page=1 reason: Unexpected token } in JSON at position 2',
         );
 
         done();
@@ -87,15 +88,17 @@ describe('requests', () => {
     test('200', async done => {
       fetchMock.post('api/pokemon', {
         body: { id: 1 },
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       });
 
       const json = await post('api/pokemon', { name: 'bulbasaur' });
       expect(json).toEqual({ id: 1 });
 
-      const fetchOptions = fetchMock.lastOptions();
-      expect(fetchOptions.body).toBe(`{"name":"bulbasaur"}`);
-      expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+      // @ts-ignore
+      const { headers, body } = fetchMock.lastOptions();
+
+      expect(headers['Content-Type']).toBe('application/json');
+      expect(body).toBe('{"name":"bulbasaur"}');
 
       done();
     });
@@ -104,12 +107,14 @@ describe('requests', () => {
       fetchMock.post('api/pokemon', 500);
 
       try {
-        const json = await post('api/pokemon', { name: 'bulbasaur' });
+        await post('api/pokemon', { name: 'bulbasaur' });
         fail();
       } catch (e) {
-        const fetchOptions = fetchMock.lastOptions();
-        expect(fetchOptions.body).toBe(`{"name":"bulbasaur"}`);
-        expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+        // @ts-ignore
+        const { headers, body } = fetchMock.lastOptions();
+
+        expect(body).toBe(`{"name":"bulbasaur"}`);
+        expect(headers['Content-Type']).toBe('application/json');
 
         expect(e.message).toBe('Internal Server Error');
         expect(e.response).not.toBe(undefined);
@@ -121,19 +126,21 @@ describe('requests', () => {
     test('200: parse error', async done => {
       fetchMock.post('api/pokemon', {
         body: '[]}{}]',
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       });
 
       try {
-        const json = await post('api/pokemon', { name: 'bulbasaur' });
+        await post('api/pokemon', { name: 'bulbasaur' });
         fail();
       } catch (e) {
-        const fetchOptions = fetchMock.lastOptions();
-        expect(fetchOptions.body).toBe(`{"name":"bulbasaur"}`);
-        expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+        // @ts-ignore
+        const { headers, body } = fetchMock.lastOptions();
+
+        expect(body).toBe(`{"name":"bulbasaur"}`);
+        expect(headers['Content-Type']).toBe('application/json');
 
         expect(e.message).toBe(
-          'invalid json response body at api/pokemon reason: Unexpected token } in JSON at position 2'
+          'invalid json response body at /api/pokemon reason: Unexpected token } in JSON at position 2',
         );
 
         done();
@@ -145,15 +152,17 @@ describe('requests', () => {
     test('200', async done => {
       fetchMock.put('api/pokemon/1', {
         body: { id: 1 },
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       });
 
       const json = await put('api/pokemon/1', { name: 'bulbasaur' });
       expect(json).toEqual({ id: 1 });
 
-      const fetchOptions = fetchMock.lastOptions();
-      expect(fetchOptions.body).toBe(`{"name":"bulbasaur"}`);
-      expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+      // @ts-ignore
+      const { body, headers } = fetchMock.lastOptions();
+
+      expect(body).toBe(`{"name":"bulbasaur"}`);
+      expect(headers['Content-Type']).toBe('application/json');
 
       done();
     });
@@ -162,12 +171,14 @@ describe('requests', () => {
       fetchMock.put('api/pokemon/1', 500);
 
       try {
-        const json = await put('api/pokemon/1', { name: 'bulbasaur' });
+        await put('api/pokemon/1', { name: 'bulbasaur' });
         fail();
       } catch (e) {
-        const fetchOptions = fetchMock.lastOptions();
-        expect(fetchOptions.body).toBe(`{"name":"bulbasaur"}`);
-        expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+        // @ts-ignore
+        const { body, headers } = fetchMock.lastOptions();
+
+        expect(body).toBe(`{"name":"bulbasaur"}`);
+        expect(headers['Content-Type']).toBe('application/json');
 
         expect(e.message).toBe('Internal Server Error');
         expect(e.response).not.toBe(undefined);
@@ -179,19 +190,21 @@ describe('requests', () => {
     test('200: parse error', async done => {
       fetchMock.put('api/pokemon/1', {
         body: '[]}{}]',
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       });
 
       try {
-        const json = await put('api/pokemon/1', { name: 'bulbasaur' });
+        await put('api/pokemon/1', { name: 'bulbasaur' });
         fail();
       } catch (e) {
-        const fetchOptions = fetchMock.lastOptions();
-        expect(fetchOptions.body).toBe(`{"name":"bulbasaur"}`);
-        expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+        // @ts-ignore
+        const { body, headers } = fetchMock.lastOptions();
+
+        expect(body).toBe(`{"name":"bulbasaur"}`);
+        expect(headers['Content-Type']).toBe('application/json');
 
         expect(e.message).toBe(
-          'invalid json response body at api/pokemon/1 reason: Unexpected token } in JSON at position 2'
+          'invalid json response body at /api/pokemon/1 reason: Unexpected token } in JSON at position 2',
         );
 
         done();
@@ -203,15 +216,17 @@ describe('requests', () => {
     test('200', async done => {
       fetchMock.patch('api/pokemon/1', {
         body: { id: 1 },
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       });
 
       const json = await patch('api/pokemon/1', { name: 'bulbasaur' });
       expect(json).toEqual({ id: 1 });
 
-      const fetchOptions = fetchMock.lastOptions();
-      expect(fetchOptions.body).toBe(`{"name":"bulbasaur"}`);
-      expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+      // @ts-ignore
+      const { body, headers } = fetchMock.lastOptions();
+
+      expect(body).toBe(`{"name":"bulbasaur"}`);
+      expect(headers['Content-Type']).toBe('application/json');
 
       done();
     });
@@ -220,12 +235,14 @@ describe('requests', () => {
       fetchMock.patch('api/pokemon/1', 500);
 
       try {
-        const json = await patch('api/pokemon/1', { name: 'bulbasaur' });
+        await patch('api/pokemon/1', { name: 'bulbasaur' });
         fail();
       } catch (e) {
-        const fetchOptions = fetchMock.lastOptions();
-        expect(fetchOptions.body).toBe(`{"name":"bulbasaur"}`);
-        expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+        // @ts-ignore
+        const { body, headers } = fetchMock.lastOptions();
+
+        expect(body).toBe(`{"name":"bulbasaur"}`);
+        expect(headers['Content-Type']).toBe('application/json');
 
         expect(e.message).toBe('Internal Server Error');
         expect(e.response).not.toBe(undefined);
@@ -237,19 +254,21 @@ describe('requests', () => {
     test('200: parse error', async done => {
       fetchMock.patch('api/pokemon/1', {
         body: '[]}{}]',
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       });
 
       try {
-        const json = await patch('api/pokemon/1', { name: 'bulbasaur' });
+        await patch('api/pokemon/1', { name: 'bulbasaur' });
         fail();
       } catch (e) {
-        const fetchOptions = fetchMock.lastOptions();
-        expect(fetchOptions.body).toBe(`{"name":"bulbasaur"}`);
-        expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+        // @ts-ignore
+        const { body, headers } = fetchMock.lastOptions();
+
+        expect(body).toBe(`{"name":"bulbasaur"}`);
+        expect(headers['Content-Type']).toBe('application/json');
 
         expect(e.message).toBe(
-          'invalid json response body at api/pokemon/1 reason: Unexpected token } in JSON at position 2'
+          'invalid json response body at /api/pokemon/1 reason: Unexpected token } in JSON at position 2',
         );
 
         done();
@@ -261,14 +280,15 @@ describe('requests', () => {
     test('200', async done => {
       fetchMock.delete('api/pokemon/1', {
         body: { id: 1 },
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       });
 
       const json = await remove('api/pokemon/1');
       expect(json).toEqual({ id: 1 });
 
-      const fetchOptions = fetchMock.lastOptions();
-      expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+      // @ts-ignore
+      const { headers } = fetchMock.lastOptions();
+      expect(headers['Content-Type']).toBe('application/json');
 
       done();
     });
@@ -277,12 +297,13 @@ describe('requests', () => {
       fetchMock.delete('api/pokemon/1', 500);
 
       try {
-        const json = await remove('api/pokemon/1');
+        await remove('api/pokemon/1');
         fail();
       } catch (e) {
-        const fetchOptions = fetchMock.lastOptions();
-        expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+        // @ts-ignore
+        const { headers } = fetchMock.lastOptions();
 
+        expect(headers['Content-Type']).toBe('application/json');
         expect(e.message).toBe('Internal Server Error');
         expect(e.response).not.toBe(undefined);
 
@@ -293,18 +314,19 @@ describe('requests', () => {
     test('200: parse error', async done => {
       fetchMock.delete('api/pokemon/1', {
         body: '[]}{}]',
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       });
 
       try {
-        const json = await remove('api/pokemon/1');
+        await remove('api/pokemon/1');
         fail();
       } catch (e) {
-        const fetchOptions = fetchMock.lastOptions();
-        expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+        // @ts-ignore
+        const { headers } = fetchMock.lastOptions();
 
+        expect(headers['Content-Type']).toBe('application/json');
         expect(e.message).toBe(
-          'invalid json response body at api/pokemon/1 reason: Unexpected token } in JSON at position 2'
+          'invalid json response body at /api/pokemon/1 reason: Unexpected token } in JSON at position 2',
         );
 
         done();
