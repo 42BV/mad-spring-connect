@@ -4,7 +4,7 @@ import { stringify } from 'query-string';
 
 import { getFetch, getMiddleware } from './config';
 
-import type { Middleware } from './middleware';
+import type {Middleware, MiddlewareDetailInfo} from './middleware';
 
 /**
  * Does a GET request to the given url, with the query params if
@@ -25,7 +25,7 @@ import type { Middleware } from './middleware';
 export function get(url: string, queryParams: ?Object = undefined): Promise<any> {
   const finalUrl = buildUrl(url, queryParams);
 
-  return applyMiddleware(getFetch()(finalUrl));
+  return applyMiddleware(getFetch()(finalUrl), { url, queryParams, method: "GET" });
 }
 
 /**
@@ -46,15 +46,17 @@ export function get(url: string, queryParams: ?Object = undefined): Promise<any>
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
 export function post(url: string, payload: Object): Promise<any> {
+  let method = "POST";
+
   const options = {
     headers: {
       'Content-Type': 'application/json'
     },
-    method: 'POST',
+    method,
     body: JSON.stringify(payload)
   };
 
-  return applyMiddleware(getFetch()(url, options));
+  return applyMiddleware(getFetch()(url, options), { url, payload, method });
 }
 
 /**
@@ -75,15 +77,17 @@ export function post(url: string, payload: Object): Promise<any> {
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
 export function put(url: string, payload: Object): Promise<any> {
+  let method = "PUT";
+
   const options = {
     headers: {
       'Content-Type': 'application/json'
     },
-    method: 'PUT',
+    method,
     body: JSON.stringify(payload)
   };
 
-  return applyMiddleware(getFetch()(url, options));
+  return applyMiddleware(getFetch()(url, options), { url, payload, method });
 }
 
 /**
@@ -104,15 +108,17 @@ export function put(url: string, payload: Object): Promise<any> {
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
 export function patch(url: string, payload: Object): Promise<any> {
+  let method = "PATCH";
+
   const options = {
     headers: {
       'Content-Type': 'application/json'
     },
-    method: 'PATCH',
+    method,
     body: JSON.stringify(payload)
   };
 
-  return applyMiddleware(getFetch()(url, options));
+  return applyMiddleware(getFetch()(url, options), { url, payload, method });
 }
 
 /**
@@ -135,14 +141,19 @@ export function patch(url: string, payload: Object): Promise<any> {
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
 export function remove(url: string): Promise<any> {
+  let method = "DELETE";
+
   const options = {
     headers: {
       'Content-Type': 'application/json'
     },
-    method: 'DELETE'
+    method
   };
 
-  return applyMiddleware(getFetch()(url, options));
+  return applyMiddleware(getFetch()(url, options), {
+    url,
+    method
+  });
 }
 
 // Helpers
@@ -156,13 +167,13 @@ function buildUrl(url: string, queryParams: ?Object): string {
   }
 }
 
-function applyMiddleware(promise: Promise<*>): Promise<*> {
+function applyMiddleware(promise: Promise<*>, additionalProps: MiddlewareDetailInfo): Promise<*> {
   const middleware: Array<Middleware> = getMiddleware();
 
   let nextPromise = promise;
 
   middleware.forEach((fn) => {
-    nextPromise = fn(nextPromise);
+    nextPromise = fn(nextPromise, additionalProps);
   });
 
   return nextPromise;
