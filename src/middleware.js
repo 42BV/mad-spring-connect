@@ -1,9 +1,10 @@
 // @flow
 
 /**
- * Middleware is a function which takes a Promise and 
- * returns a new promise. What happens in the middle is
- * what the middleware actually does.
+ * Middleware is a function which takes a Promise, and optionally
+ * the url and options of the request and returns a new promise and
+ * an object containing the necessary information to repeat the request.
+ * What happens in the middle is what the middleware actually does.
  * 
  * There are a couple of rules to define your own middleware:
  * 
@@ -25,7 +26,9 @@
  * } 
  * ```
  */
-export type Middleware = (Promise<*>) => Promise<*>;
+type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+export type MiddlewareDetailInfo = { url: string, method: Method, queryParams?: ?Object, payload?: ?Object };
+export type Middleware = (Promise<*>, MiddlewareDetailInfo) => Promise<*>;
 
 /**
  * Represents an error which arose from handling a Response.

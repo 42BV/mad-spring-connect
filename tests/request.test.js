@@ -8,6 +8,7 @@ import { get, post, put, remove, patch } from '../src/request';
 
 // Note that we tests all the requests with the default middleware
 describe('requests', () => {
+
   beforeEach(() => {
     middleware.checkStatus = jest.fn(middleware.checkStatus);
     middleware.parseJSON = jest.fn(middleware.parseJSON);
@@ -21,7 +22,6 @@ describe('requests', () => {
   afterEach(() => {
     expect(middleware.checkStatus).toHaveBeenCalledTimes(1);
     expect(middleware.parseJSON).toHaveBeenCalledTimes(1);
-
     fetchMock.restore();
   });
 
@@ -34,18 +34,31 @@ describe('requests', () => {
 
       const json = await get('api/pokemon/1');
       expect(json).toEqual({ id: 1 });
+      expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+        url: "api/pokemon/1",
+        method: "GET",
+        options: undefined
+      });
 
       done();
     });
 
     test('200: with query parameters', async done => {
-      fetchMock.get('api/pokemon?page=1', {
+      const options = {
         body: { id: 1 },
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
-      });
+      };
+      fetchMock.get('api/pokemon?page=1', options);
 
       const json = await get('api/pokemon', { page: 1 });
       expect(json).toEqual({ id: 1 });
+      expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+        url: "api/pokemon",
+        method: "GET",
+        queryParams: {
+          page: 1
+        }
+      });
 
       done();
     });
@@ -53,12 +66,20 @@ describe('requests', () => {
     test('500: server error', async done => {
       fetchMock.get('api/pokemon?page=1', 500);
 
+      const options = { page: 1 };
       try {
-        const json = await get('api/pokemon', { page: 1 });
+        const json = await get('api/pokemon', options);
         fail();
       } catch (e) {
         expect(e.message).toBe('Internal Server Error');
         expect(e.response).not.toBe(undefined);
+        expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+          url: "api/pokemon",
+          method: "GET",
+          queryParams: {
+            page: 1
+          }
+        });
 
         done();
       }
@@ -70,13 +91,21 @@ describe('requests', () => {
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       });
 
+      const options = { page: 1 };
       try {
-        const json = await get('api/pokemon', { page: 1 });
+        const json = await get('api/pokemon', options);
         fail();
       } catch (e) {
         expect(e.message).toBe(
           'invalid json response body at api/pokemon?page=1 reason: Unexpected token } in JSON at position 2'
         );
+        expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+          url: "api/pokemon",
+          method: "GET",
+          queryParams: {
+            page: 1
+          }
+        });
 
         done();
       }
@@ -85,10 +114,11 @@ describe('requests', () => {
 
   describe('post', () => {
     test('200', async done => {
-      fetchMock.post('api/pokemon', {
+      const options = {
         body: { id: 1 },
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
-      });
+      };
+      fetchMock.post('api/pokemon', options);
 
       const json = await post('api/pokemon', { name: 'bulbasaur' });
       expect(json).toEqual({ id: 1 });
@@ -96,6 +126,13 @@ describe('requests', () => {
       const fetchOptions = fetchMock.lastOptions();
       expect(fetchOptions.body).toBe(`{"name":"bulbasaur"}`);
       expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+      expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+        url: "api/pokemon",
+        method: "POST",
+        payload: {
+          name: "bulbasaur"
+        }
+      });
 
       done();
     });
@@ -103,8 +140,9 @@ describe('requests', () => {
     test('500: server error', async done => {
       fetchMock.post('api/pokemon', 500);
 
+      const payload = { name: 'bulbasaur' };
       try {
-        const json = await post('api/pokemon', { name: 'bulbasaur' });
+        const json = await post('api/pokemon', payload);
         fail();
       } catch (e) {
         const fetchOptions = fetchMock.lastOptions();
@@ -113,6 +151,11 @@ describe('requests', () => {
 
         expect(e.message).toBe('Internal Server Error');
         expect(e.response).not.toBe(undefined);
+        expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+          url: "api/pokemon",
+          method: "POST",
+          payload
+        });
 
         done();
       }
@@ -135,6 +178,11 @@ describe('requests', () => {
         expect(e.message).toBe(
           'invalid json response body at api/pokemon reason: Unexpected token } in JSON at position 2'
         );
+        expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+          url: "api/pokemon",
+          method: "POST",
+          payload: { name: 'bulbasaur' }
+        });
 
         done();
       }
@@ -154,6 +202,11 @@ describe('requests', () => {
       const fetchOptions = fetchMock.lastOptions();
       expect(fetchOptions.body).toBe(`{"name":"bulbasaur"}`);
       expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+      expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+        url: "api/pokemon/1",
+        method: "PUT",
+        payload: { name: 'bulbasaur' }
+      });
 
       done();
     });
@@ -171,6 +224,11 @@ describe('requests', () => {
 
         expect(e.message).toBe('Internal Server Error');
         expect(e.response).not.toBe(undefined);
+        expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+          url: "api/pokemon/1",
+          method: "PUT",
+          payload: { name: 'bulbasaur' }
+        });
 
         done();
       }
@@ -193,6 +251,11 @@ describe('requests', () => {
         expect(e.message).toBe(
           'invalid json response body at api/pokemon/1 reason: Unexpected token } in JSON at position 2'
         );
+        expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+          url: "api/pokemon/1",
+          method: "PUT",
+          payload: { name: 'bulbasaur' }
+        });
 
         done();
       }
@@ -212,6 +275,11 @@ describe('requests', () => {
       const fetchOptions = fetchMock.lastOptions();
       expect(fetchOptions.body).toBe(`{"name":"bulbasaur"}`);
       expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+      expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+        url: "api/pokemon/1",
+        method: "PATCH",
+        payload: { name: 'bulbasaur' }
+      });
 
       done();
     });
@@ -229,6 +297,11 @@ describe('requests', () => {
 
         expect(e.message).toBe('Internal Server Error');
         expect(e.response).not.toBe(undefined);
+        expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+          url: "api/pokemon/1",
+          method: "PATCH",
+          payload: { name: 'bulbasaur' }
+        });
 
         done();
       }
@@ -251,6 +324,11 @@ describe('requests', () => {
         expect(e.message).toBe(
           'invalid json response body at api/pokemon/1 reason: Unexpected token } in JSON at position 2'
         );
+        expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+          url: "api/pokemon/1",
+          method: "PATCH",
+          payload: { name: 'bulbasaur' }
+        });
 
         done();
       }
@@ -269,6 +347,11 @@ describe('requests', () => {
 
       const fetchOptions = fetchMock.lastOptions();
       expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+      expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+        url: "api/pokemon/1",
+        method: "DELETE",
+        payload: undefined
+      });
 
       done();
     });
@@ -285,6 +368,11 @@ describe('requests', () => {
 
         expect(e.message).toBe('Internal Server Error');
         expect(e.response).not.toBe(undefined);
+        expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+          url: "api/pokemon/1",
+          method: "DELETE",
+          payload: undefined
+        });
 
         done();
       }
@@ -306,6 +394,11 @@ describe('requests', () => {
         expect(e.message).toBe(
           'invalid json response body at api/pokemon/1 reason: Unexpected token } in JSON at position 2'
         );
+        expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise),  {
+          url: "api/pokemon/1",
+          method: "DELETE",
+          payload: undefined
+        });
 
         done();
       }

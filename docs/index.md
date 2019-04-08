@@ -448,7 +448,9 @@ All util functions which do requests are passed through a middleware layer.
 Middleware is a type with the following definition:
 
 ```js
-export type Middleware = (Promise<*>) => Promise<*>
+type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+export type MiddlewareDetailInfo = { url: string, method: Method, queryParams?: ?Object, payload?: ?Object };
+export type Middleware = (Promise<*>, ?MiddlewareDetailInfo) => Promise<*>
 ```
 
 Middleware is a function which takes a Promise and 
@@ -457,6 +459,10 @@ what the middleware actually does.
 
 Each middleware you configure will hook into the previous
 middleware in order of definition in the configuration.
+
+As an optional second argument you can receive the data that
+was used to construct the request that was made so you can
+take further actions if needed.
 
 ### Default middleware
 
@@ -516,10 +522,10 @@ to 400 errors and 'alerts' those errors to show them to the
 user:
 
 ```js
-function displayError(promise) {
+function displayError(promise, middlewareDetailInfo) {
   return promise.catch((error) => {
     if (error.response.status === 400) {
-      window.alert(error.message);
+      window.alert(`An error occurred when attempting to request ${middlewareDetailInfo.url}: ${error.message}`);
     }
  
     // Keep the chain alive.
