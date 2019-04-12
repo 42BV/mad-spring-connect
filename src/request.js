@@ -158,7 +158,7 @@ export function remove(url: string): Promise<any> {
 
 // Helpers
 
-function buildUrl(url: string, queryParams: ?Object): string {
+export function buildUrl(url: string, queryParams: ?Object): string {
   if (queryParams) {
     const params = stringify(queryParams);
     return `${url}?${params}`;
@@ -167,7 +167,7 @@ function buildUrl(url: string, queryParams: ?Object): string {
   }
 }
 
-function applyMiddleware(promise: Promise<*>, additionalProps: MiddlewareDetailInfo): Promise<*> {
+export function applyMiddleware(promise: Promise<*>, additionalProps: MiddlewareDetailInfo): Promise<*> {
   const middleware: Array<Middleware> = getMiddleware();
 
   let nextPromise = promise;
