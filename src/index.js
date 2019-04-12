@@ -1,6 +1,6 @@
 // @flow
 
-export { configureMadConnect } from './config';
+export { configureMadConnect, getFetch } from './config';
 export type { Config } from './config';
 
 export { checkStatus, parseJSON } from './middleware';
@@ -21,3 +21,5 @@ export type { Page } from './spring-models';
 export { emptyPage } from './spring-models';
 
 export { makeInstance } from './utils';
+
+export { buildUrl, applyMiddleware } from "./request";

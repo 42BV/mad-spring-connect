@@ -551,3 +551,16 @@ configureMadConnect({
   middleware: [checkStatus, parseJSON, displayError]
 });
 ```
+
+### Custom calls with applyMiddleware
+
+You can create custom fetch operations but still apply the 
+configured middleware because the applyMiddleware and getFetch
+functions are exposed:
+
+```js
+const promise = applyMiddleware(getFetch()(url, options), { url, method, queryParams, payload });
+```
+
+This way you can control all the options that are given to
+fetch method, such as the headers or body.
