@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.2.0] - 2019-04-15
+- Exposed applyMiddleware, getFetch and buildUrl to allow more customised calls
+
+## [2.1.0] - 2019-04-11
+- Now passing the URL and optionally the queryParams and payload as extra parameters for the middleware
+
+
 ## [2.0.0] - 2018-04-16
 - Fixed a bug which caused the `emptyPage` from the spring-models not
 to be recognized as being of type Page<T>. `emptyPage` is now a function
