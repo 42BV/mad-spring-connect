@@ -9,6 +9,7 @@ export declare class Resource<T> {
   public save(): Promise<T>;
   public remove(): Promise<T>;
   public static one<T>(id: number, queryParams?: QueryParams): Promise<T>;
+  public static findOne<T>(queryParams: QueryParams): Promise<T | null>;
   public static list<T>(queryParams?: QueryParams): Promise<T[]>;
   public static page<T>(queryParams?: QueryParams): Promise<Page<T>>;
 }
@@ -95,6 +96,31 @@ export function makeResource<T>(baseUrl: string): typeof Resource {
      */
     public static async one<T>(id: number, queryParams?: QueryParams): Promise<T> {
       const json = await get(`${baseUrl}/${id}`, queryParams);
+      // @ts-ignore
+      return makeInstance(this, json);
+    }
+
+    /**
+     * Find a single optional Resource of type T from the server.
+     *
+     * @example
+     * ```js
+     * Pokemon.findOne({ name: 'Pickachu' }).then((pokemon: Pokemon) => {
+     *   console.log(pokemon);
+     * });
+     * ```
+     *
+     * @static
+     * @param {QueryParams} queryParams The query params for the url
+     * @returns {Promise<T>} A Promise returning the Resource of type T or null.
+     */
+    public static async findOne<T>(queryParams: QueryParams): Promise<T | null> {
+      const json = await get(baseUrl, queryParams);
+
+      if (json.constructor === Object && Object.keys(json).length === 0) {
+        return null;
+      }
+
       // @ts-ignore
       return makeInstance(this, json);
     }

@@ -37,6 +37,7 @@ declare class BaseResource<T> {
   public save(): Promise<T>;
   public remove(): Promise<T>;
   public static one<T>(id: number, queryParams?: QueryParams): Promise<T>;
+  public static findOne<T>(queryParams: QueryParams): Promise<T | null>;
   public static list<T>(queryParams?: QueryParams): Promise<T[]>;
   public static page<T>(queryParams?: QueryParams): Promise<Page<T>>;
 }
@@ -112,6 +113,22 @@ To retrieve a [Page](http://docs.spring.io/spring-data/commons/docs/current/api/
 Pokemon.page({ page: 1 })
   .then((pokemon: Page<Pokemon>) => {
     // You have a Page of Pokemon instances here.
+    console.log(pokemon);
+  })
+  .catch(() => {
+    // Handle any errors here.
+  });
+```
+
+### Searching for one Pokemon
+
+To find a single pokemon based on query params you can call:
+
+```js
+// GET api/pokemon?name=bulbasaur
+Pokemon.findOne({ name: 'bulbasaur' })
+  .then((pokemon: Promise<Pokemon | null>) => {
+    // You have either a Pokemon or null here
     console.log(pokemon);
   })
   .catch(() => {

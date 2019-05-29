@@ -168,6 +168,49 @@ describe('Resource', () => {
     });
   });
 
+  describe('findOne', () => {
+    test('when resource does not exist', async done => {
+      const response = {
+        body: {},
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      };
+
+      fetchMock.get('api/pokemon?name=bulbasaur', response);
+
+      const pokemon: Pokemon | null = await Pokemon.findOne({ name: 'bulbasaur' });
+
+      expect(pokemon).toBe(null);
+
+      done();
+    });
+
+    test('when resource exists', async done => {
+      const response = {
+        body: {
+          id: 1,
+          name: 'bulbasaur',
+          types: ['poison', 'grass'],
+        },
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      };
+
+      fetchMock.get('api/pokemon?name=bulbasaur', response);
+
+      const pokemon: Pokemon | null = await Pokemon.findOne({ name: 'bulbasaur' });
+
+      if (pokemon) {
+        expect(pokemon instanceof Pokemon).toBe(true);
+        expect(pokemon.id).toBe(1);
+        expect(pokemon.name).toBe('bulbasaur');
+        expect(pokemon.types).toEqual(['poison', 'grass']);
+      } else {
+        done.fail();
+      }
+
+      done();
+    });
+  });
+
   describe('list', () => {
     test('without query params', async done => {
       const response = {

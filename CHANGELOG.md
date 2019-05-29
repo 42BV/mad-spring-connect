@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Added `findOne` method which allows the user to search for one entity.
 
 ## [2.2.0] - 2019-04-15
 - Exposed applyMiddleware, getFetch and buildUrl to allow more customised calls
