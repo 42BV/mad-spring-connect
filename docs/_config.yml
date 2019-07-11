@@ -1,4 +1,6 @@
-theme: jekyll-theme-tactile
-title: [mad-spring-connect]
-description: [Connecting with a Spring REST APIs in a domain friendly manner]
-show_downloads: false
+remote_theme: 42bv/fortytwo
+title: 'mad-spring-connect'
+description: 'Connecting with Spring REST APIs'
+baseurl: /mad-spring-connect/
+plugins:
+  - jekyll-remote-theme
