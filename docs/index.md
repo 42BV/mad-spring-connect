@@ -2,7 +2,7 @@
 layout: default
 title: Introduction
 nav_order: 1
-description: 'Documentation for mad-spring-connect.'
+description: 'Documentation for @42.nl/spring-connect.'
 has_children: true
 permalink: /
 ---
@@ -23,5 +23,5 @@ has its own properties and extra methods. Trying to catch all these
 differences via a _configuration_ based API is **_impossible_**. Using
 code is more natural and easier to understand.
 
-Therefore 'mad-spring-connect' allows you to define a Resource, with
+Therefore '@42.nl/spring-connect' allows you to define a Resource, with
 some bells and whistles, but allows you to customize it in code.
