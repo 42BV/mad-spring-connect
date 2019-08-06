@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Usage
-description: 'Usage instructions for mad-spring-connect.'
+description: 'Usage instructions for @42.nl/spring-connect.'
 parent: Introduction
 permalink: /usage
 nav_order: 3
@@ -25,7 +25,7 @@ declare class BaseResource<T> {
 Lets say we want to define a Pokemon resource, we do this like so:
 
 ```js
-import { makeResource, Page } from 'mad-spring-connect';
+import { makeResource, Page } from '@42.nl/spring-connect';
 
 class Pokemon extends makeResource('api/pokemon')<Pokemon> {
   // These are the properties of the pokemon
@@ -156,7 +156,7 @@ pokemon.save().then(() => {
 Say you want to add method which retrieves all the evolutions of a pokemon, this is how you do it:
 
 ```js
-import { get, makeInstance, makeResource } from 'mad-spring-connect';
+import { get, makeInstance, makeResource } from '@42.nl/spring-connect';
 
 class Pokemon extends makeResource('api/pokemon')<Pokemon> {
   // shortend the definition of the pokemon class.
@@ -203,7 +203,7 @@ You can override `save` and `remove` by simply defining them.
 This example defines its own custom `save` implementation:
 
 ```js
-import { makeResource, post, put, Page } from 'mad-spring-connect';
+import { makeResource, post, put, Page } from '@42.nl/spring-connect';
 import { merge } from 'lodash';
 
 class Pokemon extends makeResource('api/pokemon')<Pokemon> {
@@ -234,7 +234,7 @@ This example defines its own custom `one` implementation:
 
 ```js
 
-import { makeResource, get, makeInstance, Page } from 'mad-spring-connect';
+import { makeResource, get, makeInstance, Page } from '@42.nl/spring-connect';
 
 // When a pokemon is retrieved in a page it has less info.
 export interface PagePokemon {
@@ -280,7 +280,7 @@ The **_get_** function does a GET request to the given url, with the query param
 For example:
 
 ```js
-import { get } from 'mad-spring-connect';
+import { get } from '@42.nl/spring-connect';
 
 get('api/pokemon', { page: 1 }).then(json => {
   // Do something with the json here
@@ -333,7 +333,7 @@ Then gives the result to the configured middleware
 for processing.
 
 ```js
-import { remove } from 'mad-spring-connect';
+import { remove } from '@42.nl/spring-connect';
 
 remove('api/pokemon/1').then(() => {
   // Do something here.
@@ -349,7 +349,7 @@ as the properties of the class.
 For example:
 
 ```js
-import { makeInstance } from 'mad-spring-connect';
+import { makeInstance } from '@42.nl/spring-connect';
 
 class Person {
   id: number;
@@ -374,7 +374,7 @@ configure two things, the middleware chain it uses and
 you can set the `fetch` it uses.
 
 ```js
-import { configureMadConnect, checkStatus, parseJSON } from 'mad-spring-connect';
+import { configureMadConnect, checkStatus, parseJSON } from '@42.nl/spring-connect';
 
 import { authFetch } from 'redux-mad-authentication';
 
@@ -489,7 +489,7 @@ Now all you need to do is to call `configureMadConnect` and
 set the middleware:
 
 ```js
-import { configureMadConnect, checkStatus, parseJSON } from 'mad-spring-connect';
+import { configureMadConnect, checkStatus, parseJSON } from '@42.nl/spring-connect';
 
 import { authFetch } from 'redux-mad-authentication';
 

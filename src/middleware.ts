@@ -104,7 +104,7 @@ export async function parseJSON(promise: Promise<Response>): Promise<any> {
   }
   const contentType = response.headers.get('Content-Type');
   if (contentType === null || contentType.includes('json') === false) {
-    throw new Error('mad-spring-connect: Content-Type is not json, will not parse.');
+    throw new Error('@42.nl/spring-connect: Content-Type is not json, will not parse.');
   }
   return response.json();
 }

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.1.2] - 2019-08-06
+
+- Renamed to @42.nl/spring-connect
+
 ## [3.1.1] - 2019-07-16
 
 - Upgraded `lodash.merge` to resolve vulnerability warnings.

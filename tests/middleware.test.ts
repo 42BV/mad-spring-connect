@@ -101,7 +101,7 @@ describe('parseJSON', () => {
         fail();
       })
       .catch(e => {
-        expect(e.message).toBe('mad-spring-connect: Content-Type is not json, will not parse.');
+        expect(e.message).toBe('@42.nl/spring-connect: Content-Type is not json, will not parse.');
         done();
       });
   });
@@ -117,7 +117,7 @@ describe('parseJSON', () => {
         fail();
       })
       .catch(e => {
-        expect(e.message).toBe('mad-spring-connect: Content-Type is not json, will not parse.');
+        expect(e.message).toBe('@42.nl/spring-connect: Content-Type is not json, will not parse.');
         done();
       });
   });

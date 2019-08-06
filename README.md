@@ -7,7 +7,7 @@ This library makes it easy to create Resource to connect to a [Spring MVC](https
 
 # Installation
 
-`npm install mad-spring-connect --save`
+`npm install @42.nl/spring-connect --save`
 
 # Documentation
 

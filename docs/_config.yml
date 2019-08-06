@@ -1,5 +1,5 @@
 remote_theme: 42bv/fortytwo
-title: 'mad-spring-connect'
+title: '@42.nl/spring-connect'
 description: 'Connecting with Spring REST APIs'
 baseurl: /mad-spring-connect/
 plugins:
