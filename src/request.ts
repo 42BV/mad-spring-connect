@@ -2,7 +2,10 @@ import { buildUrl, applyMiddleware } from './utils';
 import { getFetch } from './config';
 import { Method } from './middleware';
 
-export type QueryParams = object;
+export interface QueryParams {
+  [key: string]: unknown;
+}
+export type Payload = object | FormData;
 
 /**
  * Does a GET request to the given url, with the query params if
@@ -39,20 +42,14 @@ export function get(url: string, queryParams?: QueryParams): Promise<any> {
  * ```
  *
  * @export
- * @param {string} url  The url you want to send a POST request to.
- * @param {object} payload The payload you want to send to the server.
+ * @param {string} url The url you want to send a POST request to.
+ * @param {Payload} payload The payload you want to send to the server.
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
-export function post(url: string, payload: object): Promise<any> {
-  let method = Method.POST;
+export function post(url: string, payload: Payload): Promise<any> {
+  const method = Method.POST;
 
-  const options = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    method,
-    body: JSON.stringify(payload),
-  };
+  const options = optionsForMethodAndPayload(method, payload);
 
   return applyMiddleware(getFetch()(url, options), { url, payload, method });
 }
@@ -70,20 +67,14 @@ export function post(url: string, payload: object): Promise<any> {
  * ```
  *
  * @export
- * @param {string} url  The url you want to send a PUT request to.
- * @param {Object} payload The payload you want to send to the server.
+ * @param {string} url The url you want to send a PUT request to.
+ * @param {Payload} payload The payload you want to send to the server.
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
-export function put(url: string, payload: object): Promise<any> {
-  let method = Method.PUT;
+export function put(url: string, payload: Payload): Promise<any> {
+  const method = Method.PUT;
 
-  const options = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    method,
-    body: JSON.stringify(payload),
-  };
+  const options = optionsForMethodAndPayload(method, payload);
 
   return applyMiddleware(getFetch()(url, options), { url, payload, method });
 }
@@ -102,19 +93,13 @@ export function put(url: string, payload: object): Promise<any> {
  *
  * @export
  * @param {string} url  The url you want to send a PATCH request to.
- * @param {Object} payload The payload you want to send to the server.
+ * @param {Payload} payload The payload you want to send to the server.
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
-export function patch(url: string, payload: object): Promise<any> {
-  let method = Method.PATCH;
+export function patch(url: string, payload: Payload): Promise<any> {
+  const method = Method.PATCH;
 
-  const options = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    method,
-    body: JSON.stringify(payload),
-  };
+  const options = optionsForMethodAndPayload(method, payload);
 
   return applyMiddleware(getFetch()(url, options), { url, payload, method });
 }
@@ -139,7 +124,7 @@ export function patch(url: string, payload: object): Promise<any> {
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
 export function remove(url: string): Promise<any> {
-  let method = Method.DELETE;
+  const method = Method.DELETE;
 
   const options = {
     headers: {
@@ -152,4 +137,21 @@ export function remove(url: string): Promise<any> {
     url,
     method,
   });
+}
+
+export function optionsForMethodAndPayload(method: Method, payload: Payload): RequestInit {
+  if (payload instanceof FormData) {
+    return {
+      body: payload,
+      method,
+    };
+  } else {
+    return {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+      method,
+    };
+  }
 }

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.2.0] - 2019-08-12
+- The `post`, `patch` and `put` payload parameter can now be a `FormData`. 
+  Useful for totally controlling the `body` for example when uploading.
+
+- Updated to TypeScript `3.5.3` had to make `QueryParams` the correct
+  type as needed by `query-string`'s `stringify` method.
+
+- Exposed `Method`, `MiddlewareDetailInfo`, `QueryParams` in the index.
+
 ## [3.1.2] - 2019-08-06
 
 - Renamed to @42.nl/spring-connect
