@@ -302,6 +302,9 @@ post('api/pokemon', { name: 'bulbasaur' }).then(json => {
 });
 ```
 
+The `payload` can also be a `FormData` object, useful for when uploading
+files: See [MDN](https://developer.mozilla.org/en-US/docs/Web/API/FormData).
+
 ### put
 
 The **_put_** function does a PUT request to the given url, with the given payload.
@@ -314,6 +317,9 @@ put('api/pokemon/1', { id: 1, name: 'bulbasaur' }).then(json => {
 });
 ```
 
+The `payload` can also be a `FormData` object, useful for when uploading
+files: See [MDN](https://developer.mozilla.org/en-US/docs/Web/API/FormData).
+
 ### patch
 
 The **_patch_** function does a PATCH request to the given url, with the given payload.
@@ -325,6 +331,9 @@ patch('api/pokemon/1', { id: 1, name: 'bulbasaur' }).then(json => {
   // Do something with the json here
 });
 ```
+
+The `payload` can also be a `FormData` object, useful for when uploading
+files: See [MDN](https://developer.mozilla.org/en-US/docs/Web/API/FormData).
 
 ### remove
 

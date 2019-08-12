@@ -1,6 +1,6 @@
 {
   "name": "@42.nl/spring-connect",
-  "version": "3.1.2",
+  "version": "3.2.0",
   "description": "Connecting with a Spring REST APIs in a domain friendly manner",
   "files": [
     "lib"
@@ -40,7 +40,7 @@
     "jest": "24.5.0",
     "prettier": "1.16.4",
     "ts-jest": "24.0.0",
-    "typescript": "3.3.3333"
+    "typescript": "3.5.3"
   },
   "scripts": {
     "start": "jest test --watch",

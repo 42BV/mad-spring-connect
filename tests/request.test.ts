@@ -193,6 +193,47 @@ describe('requests', () => {
         done();
       }
     });
+
+    test('200: custom payload', async done => {
+      const options = {
+        body: { id: 1 },
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      };
+      fetchMock.post('api/pokemon', options);
+
+      const payload = new FormData();
+
+      const blob = new Blob([JSON.stringify({ name: 'bulbasaur' })], {
+        type: 'application/json',
+      });
+      payload.append('pokemon', blob);
+
+      const json = await post('api/pokemon', payload);
+      expect(json).toEqual({ id: 1 });
+
+      const fetchOptions = fetchMock.lastOptions();
+      // @ts-ignore
+      expect(fetchOptions.headers).toBe(undefined);
+      expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+        url: 'api/pokemon',
+        method: 'POST',
+        payload,
+      });
+
+      // @ts-ignore
+      for (let entry of fetchOptions.body.entries()) {
+        const [key, value] = entry;
+
+        expect(key).toBe('pokemon');
+
+        const reader = new FileReader();
+        reader.onload = function() {
+          expect(reader.result).toBe(`{"name":"bulbasaur"}`);
+          done();
+        };
+        reader.readAsText(value);
+      }
+    });
   });
 
   describe('put', () => {
@@ -272,6 +313,47 @@ describe('requests', () => {
         done();
       }
     });
+
+    test('200: custom payload', async done => {
+      const options = {
+        body: { id: 1 },
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      };
+      fetchMock.put('api/pokemon', options);
+
+      const payload = new FormData();
+
+      const blob = new Blob([JSON.stringify({ name: 'bulbasaur' })], {
+        type: 'application/json',
+      });
+      payload.append('pokemon', blob);
+
+      const json = await put('api/pokemon', payload);
+      expect(json).toEqual({ id: 1 });
+
+      const fetchOptions = fetchMock.lastOptions();
+      // @ts-ignore
+      expect(fetchOptions.headers).toBe(undefined);
+      expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+        url: 'api/pokemon',
+        method: 'PUT',
+        payload,
+      });
+
+      // @ts-ignore
+      for (let entry of fetchOptions.body.entries()) {
+        const [key, value] = entry;
+
+        expect(key).toBe('pokemon');
+
+        const reader = new FileReader();
+        reader.onload = function() {
+          expect(reader.result).toBe(`{"name":"bulbasaur"}`);
+          done();
+        };
+        reader.readAsText(value);
+      }
+    });
   });
 
   describe('patch', () => {
@@ -349,6 +431,47 @@ describe('requests', () => {
         });
 
         done();
+      }
+    });
+
+    test('200: custom payload', async done => {
+      const options = {
+        body: { id: 1 },
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      };
+      fetchMock.patch('api/pokemon', options);
+
+      const payload = new FormData();
+
+      const blob = new Blob([JSON.stringify({ name: 'bulbasaur' })], {
+        type: 'application/json',
+      });
+      payload.append('pokemon', blob);
+
+      const json = await patch('api/pokemon', payload);
+      expect(json).toEqual({ id: 1 });
+
+      const fetchOptions = fetchMock.lastOptions();
+      // @ts-ignore
+      expect(fetchOptions.headers).toBe(undefined);
+      expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+        url: 'api/pokemon',
+        method: 'PATCH',
+        payload,
+      });
+
+      // @ts-ignore
+      for (let entry of fetchOptions.body.entries()) {
+        const [key, value] = entry;
+
+        expect(key).toBe('pokemon');
+
+        const reader = new FileReader();
+        reader.onload = function() {
+          expect(reader.result).toBe(`{"name":"bulbasaur"}`);
+          done();
+        };
+        reader.readAsText(value);
       }
     });
   });

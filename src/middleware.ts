@@ -1,5 +1,20 @@
 import { QueryParams } from './request';
 
+export enum Method {
+  GET = 'GET',
+  POST = 'POST',
+  PUT = 'PUT',
+  DELETE = 'DELETE',
+  PATCH = 'PATCH',
+}
+
+export interface MiddlewareDetailInfo {
+  url: string;
+  method: Method;
+  queryParams?: QueryParams;
+  payload?: object;
+}
+
 /**
  * Middleware is a function which takes a Promise, and optionally
  * the url and options of the request and returns a new promise and
@@ -26,20 +41,6 @@ import { QueryParams } from './request';
  * }
  * ```
  */
-export enum Method {
-  GET = 'GET',
-  POST = 'POST',
-  PUT = 'PUT',
-  DELETE = 'DELETE',
-  PATCH = 'PATCH',
-}
-export interface MiddlewareDetailInfo {
-  url: string;
-  method: Method;
-  queryParams?: QueryParams;
-  payload?: object;
-}
-
 export type Middleware = (middleware: Promise<any>, options: MiddlewareDetailInfo) => Promise<any>;
 
 /**
