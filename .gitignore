@@ -24,3 +24,10 @@ yarn-error.log*
 # IDE
 /.idea
 *.iml
+
+# Jekyll
+*.gem
+.bundle
+.sass-cache
+_site
+Gemfile.lock

@@ -1,0 +1,11 @@
+To develop the documentation you need to install Jekyll:
+
+`gem install bundler jekyll`
+
+See: https://jekyllrb.com/
+
+Then you need to install the `42bv/fortytwo` theme:
+
+`bundler install`
+
+Next in this `docs` folder run `jekyll serve`.
