@@ -12,7 +12,7 @@ does very little. `fetch` does not handle errors and JSON parsing
 of responses. It is annoying to have to manually do this every time.
 
 The middleware layer allows you to define these common behaviors once
-and use them automatically everywhere.
+and make use of them automatically.
 
 `Middleware` is a type with the following definition:
 
@@ -52,7 +52,7 @@ take further actions if needed.
 
 ### Default middleware
 
-Two middlewares are provided to you out of the box:
+Two middlewares are provided out of the box:
 
 The first is **_checkStatus_** which converts all non 2xx responses to errors.
 
@@ -61,7 +61,7 @@ export async function checkStatus(promise: Promise<Response>): Promise<Response>
   const response = await promise;
 
   const status = response.status;
-  
+
   if (status >= 200 && status <= 299) {
     return response;
   } else {
@@ -75,7 +75,7 @@ The second is **_parseJSON_** which converts a `Response` to a `JSON` object:
 ```ts
 export async function parseJSON(promise: Promise<Response>): Promise<any> {
   const response = await promise;
-  
+
   if (response.status === 204) {
     return Promise.resolve({});
   }
@@ -84,7 +84,7 @@ export async function parseJSON(promise: Promise<Response>): Promise<any> {
   if (contentType === null || contentType.includes('json') === false) {
     throw new Error('@42.nl/spring-connect: Content-Type is not json, will not parse.');
   }
-  
+
   return response.json();
 }
 ```
@@ -113,7 +113,7 @@ function displayError(promise, middlewareDetailInfo) {
 }
 ```
 
-Now all you need to do is to call `configureMadConnect` and
+Now all you need to do is call `configureMadConnect` and
 set the middleware:
 
 ```ts
@@ -130,8 +130,8 @@ configureMadConnect({
 ### Custom calls with applyMiddleware
 
 You can create custom fetch operations but still apply the
-configured middleware because the applyMiddleware and getFetch
-functions are exposed:
+configured middleware. This works because the applyMiddleware and getFetch
+functions are both exposed:
 
 ```ts
 const promise = applyMiddleware(getFetch()(url, options), { url, method, queryParams, payload });

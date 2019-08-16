@@ -6,9 +6,7 @@ description: 'Documentation for @42.nl/spring-connect.'
 permalink: /configuration
 ---
 
-You can optionally configure `@42.nl/spring-connect`. You can
-configure two things, the middleware chain it uses and
-you can set the `fetch` it uses.
+You can optionally configure `@42.nl/spring-connect` by modifying the middleware chain and the `fetch` function it uses.
 
 ```ts
 import { configureMadConnect, checkStatus, parseJSON } from '@42.nl/spring-connect';
@@ -21,7 +19,7 @@ configureMadConnect({
 });
 ```
 
-In the above example we configure that `fetch` will be the fetch
+In the above example we configure `fetch` to be the fetch function
 defined in the [@42.nl/authentication](https://github.com/42BV/react-authentication) library.
 This way the user credentials are sent whenever fetch is used.
 
