@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [4.0.0] - 2019-09-11
+- The `makeResource` should now be used like this: 
+
+  ```ts
+    class Pokemon extends makeResource<Pokemon>('api/pokemon')
+  ```
+
+  Instead of the old way:
+
+  ```ts
+    class Pokemon extends makeResource('api/pokemon')<Pokemon>
+  ```
+
+  By putting the generic directly after `makeResource` TypeScript actually 
+  recognizes the return types correcty. Before calling `Pokemon.one` would 
+  give back a `Promise<unknown>` instead of `Promise<Pokemon>`. 
+  This way we no longer need to tell TypeScript the type when
+  using it:
+
+  ```ts
+  const pokemon: Pokemon = await Pokemon.one(1);
+  ```
+
+  And we can instead we can simply do:
+
+  ```ts
+  // The type of pokemon is now correctly inferred as Pokemon
+  const pokemon = await Pokemon.one(1);
+  ```
+
+- The `findOne` method now returns a `Promise` of `T` or `void`. This
+way TypeScript recognizes the return type better, it did not understand
+`null` correctly, and acted as if it was a `T`. Now TypeScript will make 
+you check if you actually have a type T or empty. This was actually a 
+bug discovered by the better type inference. 
+
+- No longer exporting a `Resource` class definition. It got out of
+  sync really easily with the actual return value, so it has been
+  removed.
+
 ## [3.3.0] - 2019-09-11
 - The `one` method now accepts a string for the id as well.
 

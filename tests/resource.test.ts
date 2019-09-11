@@ -2,9 +2,8 @@ import fetchMock from 'fetch-mock';
 import { configureMadConnect } from '../src/config';
 import * as middleware from '../src/middleware';
 import { makeResource } from '../src/resource';
-import { Page } from '../src/spring-models';
 
-class Pokemon extends makeResource('api/pokemon')<Pokemon> {
+class Pokemon extends makeResource<Pokemon>('api/pokemon') {
   public id?: number;
   public name!: string;
   public types!: string[];
@@ -35,7 +34,7 @@ describe('Resource', () => {
 
       fetchMock.post('api/pokemon', response);
 
-      let pokemon: Pokemon = new Pokemon();
+      let pokemon = new Pokemon();
 
       pokemon.name = 'bulbasaur';
       pokemon.types = ['poison', 'grass'];
@@ -66,7 +65,7 @@ describe('Resource', () => {
 
       fetchMock.put('api/pokemon/1', response);
 
-      const pokemon: Pokemon = new Pokemon();
+      const pokemon = new Pokemon();
       pokemon.id = 1;
       pokemon.name = 'bulbasaur';
       pokemon.types = ['poison', 'grass'];
@@ -92,7 +91,7 @@ describe('Resource', () => {
         status: 204,
       });
 
-      const pokemon: Pokemon = new Pokemon();
+      const pokemon = new Pokemon();
 
       pokemon.id = 1;
       pokemon.name = 'bulbasaur';
@@ -109,7 +108,7 @@ describe('Resource', () => {
     });
 
     test('does not have id', async done => {
-      const pokemon: Pokemon = new Pokemon();
+      const pokemon = new Pokemon();
       pokemon.name = 'bulbasaur';
       pokemon.types = ['poison', 'grass'];
 
@@ -135,7 +134,7 @@ describe('Resource', () => {
 
       fetchMock.get('api/pokemon/1', response);
 
-      const pokemon: Pokemon = await Pokemon.one(1);
+      const pokemon = await Pokemon.one(1);
 
       expect(pokemon instanceof Pokemon).toBe(true);
       expect(pokemon.id).toBe(1);
@@ -157,7 +156,7 @@ describe('Resource', () => {
 
       fetchMock.get('api/pokemon/1?number=42', response);
 
-      const pokemon: Pokemon = await Pokemon.one(1, { number: 42 });
+      const pokemon = await Pokemon.one(1, { number: 42 });
 
       expect(pokemon instanceof Pokemon).toBe(true);
       expect(pokemon.id).toBe(1);
@@ -179,7 +178,7 @@ describe('Resource', () => {
 
       fetchMock.get('api/pokemon/1', response);
 
-      const pokemon: Pokemon = await Pokemon.one('1');
+      const pokemon = await Pokemon.one('1');
 
       expect(pokemon instanceof Pokemon).toBe(true);
       expect(pokemon.id).toBe(1);
@@ -199,9 +198,9 @@ describe('Resource', () => {
 
       fetchMock.get('api/pokemon?name=bulbasaur', response);
 
-      const pokemon: Pokemon | null = await Pokemon.findOne({ name: 'bulbasaur' });
+      const pokemon = await Pokemon.findOne({ name: 'bulbasaur' });
 
-      expect(pokemon).toBe(null);
+      expect(pokemon).toBe(undefined);
 
       done();
     });
@@ -218,7 +217,7 @@ describe('Resource', () => {
 
       fetchMock.get('api/pokemon?name=bulbasaur', response);
 
-      const pokemon: Pokemon | null = await Pokemon.findOne({ name: 'bulbasaur' });
+      const pokemon = await Pokemon.findOne({ name: 'bulbasaur' });
 
       if (pokemon) {
         expect(pokemon instanceof Pokemon).toBe(true);
@@ -257,7 +256,8 @@ describe('Resource', () => {
       };
       fetchMock.get('api/pokemon', response);
 
-      const pokemonList: Pokemon[] = await Pokemon.list();
+      const pokemonList = await Pokemon.list();
+
       expect(pokemonList.length).toBe(3);
 
       const [bulbasaur, ivysaur, venusaur] = pokemonList;
@@ -303,7 +303,8 @@ describe('Resource', () => {
       };
       fetchMock.get('api/pokemon?filter=true', response);
 
-      const pokemonList: Pokemon[] = await Pokemon.list({ filter: true });
+      const pokemonList= await Pokemon.list({ filter: true });
+
       expect(pokemonList.length).toBe(3);
 
       const [bulbasaur, ivysaur, venusaur] = pokemonList;
@@ -363,16 +364,11 @@ describe('Resource', () => {
 
       fetchMock.get('api/pokemon', response);
 
-      const pokemonPage: Page<Pokemon[]> = await Pokemon.page();
+      const pokemonPage = await Pokemon.page();
 
       expect(pokemonPage.content.length).toBe(3);
-
-      // @ts-ignore
-      const bulbasaur: Pokemon = pokemonPage.content[0];
-      // @ts-ignore
-      const ivysaur: Pokemon = pokemonPage.content[1];
-      // @ts-ignore
-      const venusaur: Pokemon = pokemonPage.content[2];
+      
+      const [bulbasaur, ivysaur, venusaur] = pokemonPage.content;
 
       expect(bulbasaur instanceof Pokemon).toBe(true);
       expect(bulbasaur.id).toBe(1);
@@ -431,12 +427,7 @@ describe('Resource', () => {
 
       expect(pokemonPage.content.length).toBe(3);
 
-      // @ts-ignore
-      const bulbasaur: Pokemon = pokemonPage.content[0];
-      // @ts-ignore
-      const ivysaur: Pokemon = pokemonPage.content[1];
-      // @ts-ignore
-      const venusaur: Pokemon = pokemonPage.content[2];
+      const [bulbasaur, ivysaur, venusaur] = pokemonPage.content;
 
       expect(bulbasaur instanceof Pokemon).toBe(true);
       expect(bulbasaur.id).toBe(1);

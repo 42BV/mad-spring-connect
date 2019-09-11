@@ -1,13 +1,13 @@
 import { Page, emptyPage } from '../src/spring-models';
 import { makeResource } from '../src/resource';
 
-class Pokemon extends makeResource('api/pokemon')<Pokemon> {
+class Pokemon extends makeResource<Pokemon>('api/pokemon') {
   public id!: number;
   public name!: string;
   public types!: string[];
 }
 
-class Bicycle extends makeResource('api/bicycle')<Pokemon> {
+class Bicycle extends makeResource<Pokemon>('api/bicycle') {
   public id!: number;
   public brand!: string;
 }
