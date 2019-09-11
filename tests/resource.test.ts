@@ -166,6 +166,28 @@ describe('Resource', () => {
 
       done();
     });
+
+    test('with id which is a string', async done => {
+      const response = {
+        body: {
+          id: 1,
+          name: 'bulbasaur',
+          types: ['poison', 'grass'],
+        },
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      };
+
+      fetchMock.get('api/pokemon/1', response);
+
+      const pokemon: Pokemon = await Pokemon.one('1');
+
+      expect(pokemon instanceof Pokemon).toBe(true);
+      expect(pokemon.id).toBe(1);
+      expect(pokemon.name).toBe('bulbasaur');
+      expect(pokemon.types).toEqual(['poison', 'grass']);
+
+      done();
+    });
   });
 
   describe('findOne', () => {

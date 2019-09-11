@@ -8,7 +8,7 @@ export declare class Resource<T> {
   public id?: number;
   public save(): Promise<T>;
   public remove(): Promise<T>;
-  public static one<T>(id: number, queryParams?: QueryParams): Promise<T>;
+  public static one<T>(id: number | string, queryParams?: QueryParams): Promise<T>;
   public static findOne<T>(queryParams: QueryParams): Promise<T | null>;
   public static list<T>(queryParams?: QueryParams): Promise<T[]>;
   public static page<T>(queryParams?: QueryParams): Promise<Page<T>>;
@@ -89,12 +89,12 @@ export function makeResource<T>(baseUrl: string): typeof Resource {
      * ```
      *
      * @static
-     * @param {number} id The id of the Resource you want to retrieve
+     * @param {number | string} id The id of the Resource you want to retrieve
      * @param {QueryParams} queryParams Optional query params for the url
      * @returns {Promise<T>} A Promise returning the Resource of type T.
      *
      */
-    public static async one<T>(id: number, queryParams?: QueryParams): Promise<T> {
+    public static async one<T>(id: number | string, queryParams?: QueryParams): Promise<T> {
       const json = await get(`${baseUrl}/${id}`, queryParams);
       // @ts-ignore
       return makeInstance(this, json);
@@ -136,7 +136,7 @@ export function makeResource<T>(baseUrl: string): typeof Resource {
      * ```
      *
      * @static
-     * @param {Object} queryParams Optional query params for the url
+     * @param {QueryParams} queryParams Optional query params for the url
      * @returns {Promise<Array<T>>} A Promise returning the Resource of type Array<T>.
      *
      * @memberOf Resource
@@ -157,7 +157,7 @@ export function makeResource<T>(baseUrl: string): typeof Resource {
      * ```
      *
      * @static
-     * @param {Object} queryParams Optional query params for the url
+     * @param {QueryParams} queryParams Optional query params for the url
      * @returns {Promise<Page<T>>} A Promise returning the Resource of type Page<T>.
      */
     public static async page<T>(queryParams?: QueryParams): Promise<Page<T>> {
