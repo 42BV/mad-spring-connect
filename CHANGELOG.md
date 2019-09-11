@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.3.0] - 2019-09-11
+- The `one` method now accepts a string for the id as well.
+
 ## [3.2.0] - 2019-08-12
 - The `post`, `patch` and `put` payload parameter can now be a `FormData`. 
   Useful for totally controlling the `body` for example when uploading.
