@@ -11,8 +11,10 @@ import { makeResource } from '../src/resource';
 
 // Test that we can add custom methods to the Resource
 describe('Scenario: "custom methods"', () => {
-  // Make sure each test can get a completely new class
-  class Pokemon extends makeResource<Pokemon>('api/pokemon') {
+  // Make sure each test can get a completely new class, and
+  // test that Config can be an object with only a baseUrl and
+  // no mapper.
+  class Pokemon extends makeResource<Pokemon>({ baseUrl: '/api/pokemon' }) {
 
     public id?: number;
     public name!: string;
@@ -70,7 +72,7 @@ describe('Scenario: "custom methods"', () => {
         },
       ],
     };
-    fetchMock.get('api/pokemon/1/evolutions', response);
+    fetchMock.get('/api/pokemon/1/evolutions', response);
   });
 
   afterEach(() => {
@@ -148,7 +150,7 @@ describe('Scenario: "custom methods"', () => {
 describe('Scenario: "override methods"', () => {
   describe('instance methods', () => {
     test('save', async done => {
-      class Pokemon extends makeResource<Pokemon>('api/pokemon') {
+      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
 
         public id?: number;
         public name!: string;
@@ -177,7 +179,7 @@ describe('Scenario: "override methods"', () => {
     });
 
     test('remove', async done => {
-      class Pokemon extends makeResource<Pokemon>('api/pokemon') {
+      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
 
         public id?: number;
         public name!: string;
@@ -208,7 +210,7 @@ describe('Scenario: "override methods"', () => {
 
   describe('static methods', () => {
     test('one', async done => {
-      class Pokemon extends makeResource<Pokemon>('api/pokemon') {
+      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
 
         public id?: number;
         public name!: string;
@@ -229,7 +231,7 @@ describe('Scenario: "override methods"', () => {
     });
 
     test('list', async done => {
-      class Pokemon extends makeResource<Pokemon>('api/pokemon') {
+      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
 
         public id?: number;
         public name!: string;
@@ -250,7 +252,7 @@ describe('Scenario: "override methods"', () => {
     });
 
     test('page', async done => {
-      class Pokemon extends makeResource<Pokemon>('api/pokemon') {
+      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
 
         public id?: number;
         public name!: string;
@@ -274,7 +276,7 @@ describe('Scenario: "override methods"', () => {
 
 // Test that we can extend methods of the Resource
 describe('Scenario: "extend methods"', () => {
-  class Pokemon extends makeResource<Pokemon>('api/pokemon') {
+  class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
 
     public id?: number;
     public name!: string;
@@ -312,7 +314,7 @@ describe('Scenario: "extend methods"', () => {
       },
     };
 
-    fetchMock.put('api/pokemon/1', response);
+    fetchMock.put('/api/pokemon/1', response);
 
     const pokemon = new Pokemon();
     pokemon.id = 1;
@@ -342,7 +344,7 @@ describe('Scenario: "extend methods"', () => {
       },
     };
 
-    fetchMock.get('api/pokemon/1', response);
+    fetchMock.get('/api/pokemon/1', response);
 
     const p = await Pokemon.one(1);
     expect(p.id).toBe(42);
@@ -355,7 +357,7 @@ describe('Scenario: "extend methods"', () => {
 test('Scenario: "custom success middleware"', async done => {
   let finished = false;
 
-  class Pokemon extends makeResource<Pokemon>('api/pokemon') {
+  class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
 
     public id?: number;
     public name!: string;
@@ -387,7 +389,7 @@ test('Scenario: "custom success middleware"', async done => {
     data: { id: 1 },
     error: {},
   };
-  fetchMock.get('api/pokemon/1', response);
+  fetchMock.get('/api/pokemon/1', response);
 
   const pokemon = await Pokemon.one(1);
   expect(pokemon).toEqual({ id: 1 });
@@ -401,7 +403,7 @@ test('Scenario: "custom success middleware"', async done => {
 
 // Test that we can override middleware
 test('Scenario: "custom error middleware"', async done => {
-  class Pokemon extends makeResource<Pokemon>('api/pokemon') {
+  class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
 
     public id?: number;
     public name!: string;
@@ -422,7 +424,7 @@ test('Scenario: "custom error middleware"', async done => {
     middleware: [middleware.checkStatus, middleware.parseJSON, customMiddleware],
   });
 
-  fetchMock.get('api/pokemon/1', { status: 400 });
+  fetchMock.get('/api/pokemon/1', { status: 400 });
 
   try {
     await Pokemon.one(1);

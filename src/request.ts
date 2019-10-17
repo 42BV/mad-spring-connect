@@ -14,7 +14,7 @@ export type Payload = object | FormData;
  *
  * @example
  * ```js
- *  get('api/pokemon', { page: 1 }).then((json) => {
+ *  get('/api/pokemon', { page: 1 }).then((json) => {
  *   // Do something with the json here
  *  });
  * ```
@@ -36,7 +36,7 @@ export function get(url: string, queryParams?: QueryParams): Promise<any> {
  *
  * @example
  * ```js
- *  post('api/pokemon', { name: "bulbasaur" }).then((json) => {
+ *  post('/api/pokemon', { name: "bulbasaur" }).then((json) => {
  *    // Do something with the json here
  *  });
  * ```
@@ -61,7 +61,7 @@ export function post(url: string, payload: Payload): Promise<any> {
  *
  * @example
  * ```js
- *  put('api/pokemon/1', { id: 1, name: "bulbasaur" }).then((json) => {
+ *  put('/api/pokemon/1', { id: 1, name: "bulbasaur" }).then((json) => {
  *    // Do something with the json here
  *  });
  * ```
@@ -86,7 +86,7 @@ export function put(url: string, payload: Payload): Promise<any> {
  *
  * @example
  * ```js
- *  patch('api/pokemon/1', { id: 1, name: "bulbasaur" }).then((json) => {
+ *  patch('/api/pokemon/1', { id: 1, name: "bulbasaur" }).then((json) => {
  *    // Do something with the json here
  *  });;
  * ```
@@ -114,7 +114,7 @@ export function patch(url: string, payload: Payload): Promise<any> {
  *
  * @example
  * ```js
- *  remove('api/pokemon/1').then(() => {
+ *  remove('/api/pokemon/1').then(() => {
  *    // Do something here.
  *  });;
  * ```

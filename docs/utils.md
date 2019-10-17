@@ -20,7 +20,7 @@ For example:
 ```ts
 import { get } from '@42.nl/spring-connect';
 
-get('api/pokemon', { page: 1 }).then(json => {
+get('/api/pokemon', { page: 1 }).then(json => {
   // Do something with the json here
 });
 ```
@@ -35,7 +35,7 @@ Then gives the result to the configured middleware
 for processing.
 
 ```ts
-post('api/pokemon', { name: 'bulbasaur' }).then(json => {
+post('/api/pokemon', { name: 'bulbasaur' }).then(json => {
   // Do something with the json here
 });
 ```
@@ -49,7 +49,7 @@ The **_put_** function does a `PUT` request to the given url, with the given pay
 It then gives the result to the configured middleware for processing.
 
 ```ts
-put('api/pokemon/1', { id: 1, name: 'bulbasaur' }).then(json => {
+put('/api/pokemon/1', { id: 1, name: 'bulbasaur' }).then(json => {
   // Do something with the json here
 });
 ```
@@ -64,7 +64,7 @@ Then gives the result to the configured middleware
 for processing.
 
 ```ts
-patch('api/pokemon/1', { id: 1, name: 'bulbasaur' }).then(json => {
+patch('/api/pokemon/1', { id: 1, name: 'bulbasaur' }).then(json => {
   // Do something with the json here
 });
 ```
@@ -81,7 +81,7 @@ for processing.
 ```ts
 import { remove } from '@42.nl/spring-connect';
 
-remove('api/pokemon/1').then(() => {
+remove('/api/pokemon/1').then(() => {
   // Do something here.
 });
 ```

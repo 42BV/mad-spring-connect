@@ -28,12 +28,29 @@ import { makeInstance } from './utils';
 */
 
 /**
+ * A Mapper takes JSON and converts it to type T.
+ *
+ * @template T
+ * @param {any} json The JSON this mapper converts to type T.
+ * @param {Class} Class The class definition of the Resource
+ * @returns
+ */
+export type Mapper<T> = (json: any, Class: { new (): T }) => T;
+
+/**
+ * Config object to declare the Resource with. Is either a string
+ * in which case it is a baseUrl, or an object containing the
+ * baseUrl and a custom mapper.
+ */
+export type MakeResourceConfig<T> = string | { baseUrl: string; mapper?: Mapper<T> };
+
+/**
  * Creates a new Resource class definition for the user to extend.
  *
  * @export
  * @example
  * ```js
- * class Pokemon extends makeResource<Pokemon>('api/pokemon') {
+ * class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
  *  public id?: number;
  *  public name!: string;
  *  public types!: string[];
@@ -44,7 +61,11 @@ import { makeInstance } from './utils';
  * @param {string} baseUrl The baseUrl of the resource
  * @returns
  */
-export function makeResource<T>(baseUrl: string) {
+export function makeResource<T>(config: MakeResourceConfig<T>) {
+  const baseUrl = typeof config === 'string' ? config : config.baseUrl;
+
+  const mapper = getMapper(config);
+
   /**
    *  A Resource represents an Object which is returned from a REST API.
    * It knows how to save / update itself, and various means to retrieve
@@ -123,8 +144,9 @@ export function makeResource<T>(baseUrl: string) {
      */
     public static async one(id: number | string, queryParams?: QueryParams): Promise<T> {
       const json = await get(`${baseUrl}/${id}`, queryParams);
+
       // @ts-ignore
-      return makeInstance(this, json);
+      return mapper(json, this);
     }
 
     /**
@@ -149,7 +171,7 @@ export function makeResource<T>(baseUrl: string) {
       }
 
       // @ts-ignore
-      return makeInstance(this, json);
+      return mapper(json, this);
     }
 
     /**
@@ -170,7 +192,10 @@ export function makeResource<T>(baseUrl: string) {
      */
     public static async list(queryParams?: QueryParams): Promise<T[]> {
       const list = await get(baseUrl, queryParams);
-      return list.map((properties: JSON) => makeInstance(this, properties));
+      return list.map((properties: JSON) => {
+        // @ts-ignore
+        return mapper(properties, this);
+      });
     }
 
     /**
@@ -189,8 +214,30 @@ export function makeResource<T>(baseUrl: string) {
      */
     public static async page(queryParams?: QueryParams): Promise<Page<T>> {
       const page = await get(baseUrl, queryParams);
-      page.content = page.content.map((properties: JSON) => makeInstance(this, properties));
+      page.content = page.content.map((properties: JSON) => {
+        // @ts-ignore
+        return mapper(properties, this);
+      });
       return page;
     }
   };
+}
+
+/**
+ * Returns the mapper to be used for the Resource based on the config.
+ */
+function getMapper<T>(config: MakeResourceConfig<T>): Mapper<T> {
+  if (typeof config === 'string') {
+    return defaultMapper;
+  } else {
+    return config.mapper ? config.mapper : defaultMapper;
+  }
+}
+
+/**
+ * The default mapper uses `makeInstance` to convert the JSON
+ * to a T.
+ */
+function defaultMapper<T>(json: JSON, Class: { new (): T }): T {
+  return makeInstance(Class, json);
 }
