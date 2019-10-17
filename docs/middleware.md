@@ -119,7 +119,7 @@ set the middleware:
 ```ts
 import { configureMadConnect, checkStatus, parseJSON } from '@42.nl/spring-connect';
 
-import { authFetch } from 'redux-mad-authentication';
+import { authFetch } from '@42.nl/authentication';
 
 configureMadConnect({
   fetch: authFetch,
