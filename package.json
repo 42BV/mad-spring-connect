@@ -1,6 +1,6 @@
 {
   "name": "@42.nl/spring-connect",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "description": "Connecting with a Spring REST APIs in a domain friendly manner",
   "files": [
     "lib"
@@ -58,7 +58,10 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "roots": ["src", "tests"],
+    "roots": [
+      "src",
+      "tests"
+    ],
     "collectCoverageFrom": [
       "./src/**/*.{ts,tsx}"
     ],
