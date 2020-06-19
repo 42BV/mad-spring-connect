@@ -4,6 +4,9 @@ import { get, post, put, remove as requestRemove, QueryParams } from './request'
 import { Page } from './spring-models';
 import { makeInstance } from './utils';
 
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+// Allow for makeResource not to have a return type
+
 /*
   Why use a `makeResource` function and why not simply export the
   Resource class which is defined inside of it, would that not be

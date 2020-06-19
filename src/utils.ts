@@ -5,6 +5,9 @@ import { QueryParams } from './request';
 import { getMiddleware } from './config';
 import Middleware, { MiddlewareDetailInfo } from './middleware';
 
+/* eslint-disable @typescript-eslint/ban-types */
+// Allow for object type as parameter to makeInstance
+
 /**
  * Takes a class definition and an object of JSON properties, and
  * creates an instance of the provided and sets the JSON properties
@@ -46,7 +49,7 @@ export function applyMiddleware(promise: Promise<any>, additionalProps: Middlewa
 
   let nextPromise = promise;
 
-  middleware.forEach(fn => {
+  middleware.forEach((fn) => {
     nextPromise = fn(nextPromise, additionalProps);
   });
 

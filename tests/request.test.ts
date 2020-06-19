@@ -26,7 +26,7 @@ describe('requests', () => {
   });
 
   describe('get', () => {
-    test('200: without query parameters', async done => {
+    test('200: without query parameters', async (done) => {
       fetchMock.get('/api/pokemon/1', {
         body: { id: 1 },
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
@@ -43,7 +43,7 @@ describe('requests', () => {
       done();
     });
 
-    test('200: with query parameters', async done => {
+    test('200: with query parameters', async (done) => {
       const options = {
         body: { id: 1 },
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
@@ -63,7 +63,7 @@ describe('requests', () => {
       done();
     });
 
-    test('500: server error', async done => {
+    test('500: server error', async (done) => {
       fetchMock.get('/api/pokemon?page=1', 500);
 
       const options = { page: 1 };
@@ -85,7 +85,7 @@ describe('requests', () => {
       }
     });
 
-    test('200: parse error', async done => {
+    test('200: parse error', async (done) => {
       fetchMock.get('/api/pokemon?page=1', {
         body: '[]}{}]',
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
@@ -113,7 +113,7 @@ describe('requests', () => {
   });
 
   describe('post', () => {
-    test('200', async done => {
+    test('200', async (done) => {
       const options = {
         body: { id: 1 },
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
@@ -139,7 +139,7 @@ describe('requests', () => {
       done();
     });
 
-    test('500: server error', async done => {
+    test('500: server error', async (done) => {
       fetchMock.post('/api/pokemon', 500);
 
       const payload = { name: 'bulbasaur' };
@@ -165,7 +165,7 @@ describe('requests', () => {
       }
     });
 
-    test('200: parse error', async done => {
+    test('200: parse error', async (done) => {
       fetchMock.post('/api/pokemon', {
         body: '[]}{}]',
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
@@ -194,7 +194,7 @@ describe('requests', () => {
       }
     });
 
-    test('200: custom payload', async done => {
+    test('200: custom payload', async (done) => {
       const options = {
         body: { id: 1 },
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
@@ -227,17 +227,41 @@ describe('requests', () => {
         expect(key).toBe('pokemon');
 
         const reader = new FileReader();
-        reader.onload = function() {
+        reader.onload = function () {
           expect(reader.result).toBe(`{"name":"bulbasaur"}`);
           done();
         };
         reader.readAsText(value);
       }
     });
+
+    test('200: primitive payload', async (done) => {
+      const options = {
+        body: { id: 1 },
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      };
+      fetchMock.post('/api/pokemon', options);
+
+      const json = await post('/api/pokemon', true);
+      expect(json).toEqual({ id: 1 });
+
+      const fetchOptions = fetchMock.lastOptions();
+      // @ts-ignore
+      expect(fetchOptions.body).toBe(`true`);
+      // @ts-ignore
+      expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+      expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+        url: '/api/pokemon',
+        method: 'POST',
+        payload: true,
+      });
+
+      done();
+    });
   });
 
   describe('put', () => {
-    test('200', async done => {
+    test('200', async (done) => {
       fetchMock.put('/api/pokemon/1', {
         body: { id: 1 },
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
@@ -260,7 +284,7 @@ describe('requests', () => {
       done();
     });
 
-    test('500: server error', async done => {
+    test('500: server error', async (done) => {
       fetchMock.put('/api/pokemon/1', 500);
 
       try {
@@ -285,7 +309,7 @@ describe('requests', () => {
       }
     });
 
-    test('200: parse error', async done => {
+    test('200: parse error', async (done) => {
       fetchMock.put('/api/pokemon/1', {
         body: '[]}{}]',
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
@@ -314,7 +338,7 @@ describe('requests', () => {
       }
     });
 
-    test('200: custom payload', async done => {
+    test('200: custom payload', async (done) => {
       const options = {
         body: { id: 1 },
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
@@ -347,17 +371,40 @@ describe('requests', () => {
         expect(key).toBe('pokemon');
 
         const reader = new FileReader();
-        reader.onload = function() {
+        reader.onload = function () {
           expect(reader.result).toBe(`{"name":"bulbasaur"}`);
           done();
         };
         reader.readAsText(value);
       }
     });
+
+    test('200: primitive payload', async (done) => {
+      fetchMock.put('/api/pokemon/1', {
+        body: { id: 1 },
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      });
+
+      const json = await put('/api/pokemon/1', 10);
+      expect(json).toEqual({ id: 1 });
+
+      const fetchOptions = fetchMock.lastOptions();
+      // @ts-ignore
+      expect(fetchOptions.body).toBe(`10`);
+      // @ts-ignore
+      expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+      expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+        url: '/api/pokemon/1',
+        method: 'PUT',
+        payload: 10,
+      });
+
+      done();
+    });
   });
 
   describe('patch', () => {
-    test('200', async done => {
+    test('200', async (done) => {
       fetchMock.patch('/api/pokemon/1', {
         body: { id: 1 },
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
@@ -380,7 +427,7 @@ describe('requests', () => {
       done();
     });
 
-    test('500: server error', async done => {
+    test('500: server error', async (done) => {
       fetchMock.patch('/api/pokemon/1', 500);
 
       try {
@@ -405,7 +452,7 @@ describe('requests', () => {
       }
     });
 
-    test('200: parse error', async done => {
+    test('200: parse error', async (done) => {
       fetchMock.patch('/api/pokemon/1', {
         body: '[]}{}]',
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
@@ -434,7 +481,7 @@ describe('requests', () => {
       }
     });
 
-    test('200: custom payload', async done => {
+    test('200: custom payload', async (done) => {
       const options = {
         body: { id: 1 },
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
@@ -467,17 +514,40 @@ describe('requests', () => {
         expect(key).toBe('pokemon');
 
         const reader = new FileReader();
-        reader.onload = function() {
+        reader.onload = function () {
           expect(reader.result).toBe(`{"name":"bulbasaur"}`);
           done();
         };
         reader.readAsText(value);
       }
     });
+
+    test('200: primitive payload', async (done) => {
+      fetchMock.patch('/api/pokemon/1', {
+        body: { id: 1 },
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      });
+
+      const json = await patch('/api/pokemon/1', 'si');
+      expect(json).toEqual({ id: 1 });
+
+      const fetchOptions = fetchMock.lastOptions();
+      // @ts-ignore
+      expect(fetchOptions.body).toBe(`"si"`);
+      // @ts-ignore
+      expect(fetchOptions.headers['Content-Type']).toBe('application/json');
+      expect(middleware.parseJSON).toHaveBeenCalledWith(expect.any(Promise), {
+        url: '/api/pokemon/1',
+        method: 'PATCH',
+        payload: 'si',
+      });
+
+      done();
+    });
   });
 
   describe('remove', () => {
-    test('200', async done => {
+    test('200', async (done) => {
       fetchMock.delete('/api/pokemon/1', {
         body: { id: 1 },
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
@@ -498,7 +568,7 @@ describe('requests', () => {
       done();
     });
 
-    test('500: server error', async done => {
+    test('500: server error', async (done) => {
       fetchMock.delete('/api/pokemon/1', 500);
 
       try {
@@ -521,7 +591,7 @@ describe('requests', () => {
       }
     });
 
-    test('200: parse error', async done => {
+    test('200: parse error', async (done) => {
       fetchMock.delete('/api/pokemon/1', {
         body: '[]}{}]',
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },

@@ -5,7 +5,8 @@ import { Method } from './middleware';
 export interface QueryParams {
   [key: string]: unknown;
 }
-export type Payload = object | FormData;
+
+export type Payload = any;
 
 /**
  * Does a GET request to the given url, with the query params if
