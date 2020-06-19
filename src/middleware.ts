@@ -12,7 +12,7 @@ export interface MiddlewareDetailInfo {
   url: string;
   method: Method;
   queryParams?: QueryParams;
-  payload?: object;
+  payload?: any;
 }
 
 /**
@@ -53,9 +53,11 @@ export type Middleware = (middleware: Promise<any>, options: MiddlewareDetailInf
 export class ErrorWithResponse extends Error {
   public response: Response;
 
+  // For some reason istanbul thinks the super call is untested.
+  // https://github.com/gotwarlost/istanbul/issues/690
+  /* istanbul ignore next */
   public constructor(response: Response) {
     super(response.statusText);
-
     this.response = response;
   }
 }
