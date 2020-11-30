@@ -1,48 +1,3 @@
-import { QueryParams } from './request';
-
-export enum Method {
-  GET = 'GET',
-  POST = 'POST',
-  PUT = 'PUT',
-  DELETE = 'DELETE',
-  PATCH = 'PATCH',
-}
-
-export interface MiddlewareDetailInfo {
-  url: string;
-  method: Method;
-  queryParams?: QueryParams;
-  payload?: any;
-}
-
-/**
- * Middleware is a function which takes a Promise, and optionally
- * the url and options of the request and returns a new promise and
- * an object containing the necessary information to repeat the request.
- * What happens in the middle is what the middleware actually does.
- *
- * There are a couple of rules to define your own middleware:
- *
- *   1. You must keep the chain alive, so you must either then or catch
- *      or do both with the incoming promise.
- *   2. When doing a 'catch' you must return a rejected promise.
- *
- * @example
- * ```js
- * function displayError(promise) {
- *   return promise.catch((error) => {
- *     if (error.response.status === 400) {
- *       window.alert(error.message);
- *     }
- *
- *     // Keep the chain alive.
- *     return Promise.reject(error);
- *   });
- * }
- * ```
- */
-export type Middleware = (middleware: Promise<any>, options: MiddlewareDetailInfo) => Promise<any>;
-
 /**
  * Represents an error which arose from handling a Response.
  *
@@ -76,7 +31,9 @@ export class ErrorWithResponse extends Error {
  * @returns {Response} The response if it was in the 2xx range.
  * @throws {ErrorWithResponse} An ErrorWithResponse instance.
  */
-export async function checkStatus(promise: Promise<Response>): Promise<Response> {
+export async function checkStatus(
+  promise: Promise<Response>
+): Promise<Response> {
   const response = await promise;
   const status = response.status;
   if (status >= 200 && status <= 299) {
@@ -107,9 +64,9 @@ export async function parseJSON(promise: Promise<Response>): Promise<any> {
   }
   const contentType = response.headers.get('Content-Type');
   if (contentType === null || contentType.includes('json') === false) {
-    throw new Error('@42.nl/spring-connect: Content-Type is not json, will not parse.');
+    throw new Error(
+      '@42.nl/spring-connect: Content-Type is not json, will not parse.'
+    );
   }
   return response.json();
 }
-
-export default Middleware;

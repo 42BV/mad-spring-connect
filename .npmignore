@@ -4,3 +4,5 @@ tests
 coverage
 .flowconfig
 src
+scripts
+.github

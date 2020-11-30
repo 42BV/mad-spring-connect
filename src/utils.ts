@@ -1,9 +1,8 @@
 import merge from 'lodash.merge';
 import { stringify } from 'query-string';
 
-import { QueryParams } from './request';
 import { getMiddleware } from './config';
-import Middleware, { MiddlewareDetailInfo } from './middleware';
+import { QueryParams, RequestInfo, Middleware } from './types';
 
 /* eslint-disable @typescript-eslint/ban-types */
 // Allow for object type as parameter to makeInstance
@@ -44,13 +43,16 @@ export function buildUrl(url: string, queryParams?: QueryParams): string {
   }
 }
 
-export function applyMiddleware(promise: Promise<any>, additionalProps: MiddlewareDetailInfo): Promise<any> {
+export function applyMiddleware(
+  promise: Promise<any>,
+  requestInfo: RequestInfo
+): Promise<any> {
   const middleware: Middleware[] = getMiddleware();
 
   let nextPromise = promise;
 
   middleware.forEach((fn) => {
-    nextPromise = fn(nextPromise, additionalProps);
+    nextPromise = fn(nextPromise, requestInfo);
   });
 
   return nextPromise;

@@ -17,24 +17,12 @@ and make use of them automatically.
 `Middleware` is a type with the following definition:
 
 ```ts
-export interface QueryParams {
-  [key: string]: unknown;
-}
-
-export enum Method {
-  GET = 'GET',
-  POST = 'POST',
-  PUT = 'PUT',
-  DELETE = 'DELETE',
-  PATCH = 'PATCH',
-}
-
-export interface MiddlewareDetailInfo {
+export type RequestInfo = {
   url: string;
   method: Method;
   queryParams?: QueryParams;
-  payload?: object;
-}
+  payload?: any;
+};
 
 export type Middleware = (middleware: Promise<any>, options: MiddlewareDetailInfo) => Promise<any>;
 ```

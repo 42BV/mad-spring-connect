@@ -8,15 +8,13 @@ describe('checkStatus', () => {
     const promise = checkStatus(Promise.resolve(response));
 
     promise
-      .then(response => {
+      .then((response) => {
         expect(response).toBe(response);
         done();
       })
-      .catch(
-        (): void => {
-          fail();
-        },
-      );
+      .catch((): void => {
+        fail();
+      });
   };
 
   test('200', check2xx(200));
@@ -25,15 +23,15 @@ describe('checkStatus', () => {
   const checkNon2xx = (status: number) => (done: () => void) => {
     const response = new Response(`{ "number": 42 }`, {
       status,
-      statusText: 'Werror',
+      statusText: 'Werror'
     });
     const promise = checkStatus(Promise.resolve(response));
 
     promise
-      .then(response => {
+      .then(() => {
         fail();
       })
-      .catch(error => {
+      .catch((error) => {
         expect(error.message).toBe('Werror');
         expect(error.response).toBe(response);
         done();
@@ -47,17 +45,17 @@ describe('checkStatus', () => {
 });
 
 describe('parseJSON', () => {
-  test('200 with Content-Type application/json', done => {
+  test('200 with Content-Type application/json', (done) => {
     const headers = new Headers({
       'Content-Length': '42',
-      'Content-Type': 'application/json;charset=UTF-8',
+      'Content-Type': 'application/json;charset=UTF-8'
     });
     const response = new Response(`{ "number": 42 }`, { status: 200, headers });
 
     const promise = parseJSON(Promise.resolve(response));
 
     promise
-      .then(json => {
+      .then((json) => {
         expect(json.number).toBe(42);
 
         done();
@@ -67,17 +65,18 @@ describe('parseJSON', () => {
       });
   });
 
-  test('200 with Content-Type application/vnd.spring-boot.actuator.v1+json', done => {
+  test('200 with Content-Type application/vnd.spring-boot.actuator.v1+json', (done) => {
     const headers = new Headers({
       'Content-Length': '42',
-      'Content-Type': 'application/vnd.spring-boot.actuator.v1+json;charset=UTF-8',
+      'Content-Type':
+        'application/vnd.spring-boot.actuator.v1+json;charset=UTF-8'
     });
     const response = new Response(`{ "number": 42 }`, { status: 200, headers });
 
     const promise = parseJSON(Promise.resolve(response));
 
     promise
-      .then(json => {
+      .then((json) => {
         expect(json.number).toBe(42);
 
         done();
@@ -87,10 +86,10 @@ describe('parseJSON', () => {
       });
   });
 
-  test('200 without Content-Type application/json', done => {
+  test('200 without Content-Type application/json', (done) => {
     const headers = new Headers({
       'Content-Length': '42',
-      'Content-Type': 'text/html;charset=UTF-8',
+      'Content-Type': 'text/html;charset=UTF-8'
     });
     const response = new Response(`{ "number": 42 }`, { status: 200, headers });
 
@@ -100,13 +99,15 @@ describe('parseJSON', () => {
       .then(() => {
         fail();
       })
-      .catch(e => {
-        expect(e.message).toBe('@42.nl/spring-connect: Content-Type is not json, will not parse.');
+      .catch((e) => {
+        expect(e.message).toBe(
+          '@42.nl/spring-connect: Content-Type is not json, will not parse.'
+        );
         done();
       });
   });
 
-  test('200 without Content-Type', done => {
+  test('200 without Content-Type', (done) => {
     const headers = new Headers({ 'Content-Length': '42' });
     const response = new Response(`{ "number": 42 }`, { status: 200, headers });
 
@@ -116,20 +117,22 @@ describe('parseJSON', () => {
       .then(() => {
         fail();
       })
-      .catch(e => {
-        expect(e.message).toBe('@42.nl/spring-connect: Content-Type is not json, will not parse.');
+      .catch((e) => {
+        expect(e.message).toBe(
+          '@42.nl/spring-connect: Content-Type is not json, will not parse.'
+        );
         done();
       });
   });
 
-  test('204', done => {
+  test('204', (done) => {
     const headers = new Headers({ 'Content-Length': '42' });
     const response = new Response(`{ "number": 42 }`, { status: 204, headers });
 
     const promise = parseJSON(Promise.resolve(response));
 
     promise
-      .then(json => {
+      .then((json) => {
         expect(json).toEqual({});
 
         done();

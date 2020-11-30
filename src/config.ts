@@ -1,14 +1,17 @@
-import Middleware, { checkStatus, parseJSON } from './middleware';
+import { checkStatus, parseJSON } from './middleware';
+import { Middleware } from './types';
 
-export default interface Config {
+type Config = {
   // The fetch variant which is used to make requests.
   fetch?: typeof fetch;
   middleware: Middleware[];
-}
+};
+
+export default Config;
 
 let config: Config = {
   fetch: undefined, // By default use fetch as is.
-  middleware: [checkStatus, parseJSON],
+  middleware: [checkStatus, parseJSON]
 };
 
 /**

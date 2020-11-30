@@ -3,7 +3,6 @@ import fetchMock from 'fetch-mock';
 import * as middleware from '../src/middleware';
 import { configureMadConnect } from '../src/config';
 import { get, makeInstance } from '../src';
-import { QueryParams } from '../src/request';
 import { makeResource } from '../src/resource';
 
 // This file contains tests for common scenarios that the user
@@ -15,7 +14,6 @@ describe('Scenario: "custom methods"', () => {
   // test that Config can be an object with only a baseUrl and
   // no mapper.
   class Pokemon extends makeResource<Pokemon>({ baseUrl: '/api/pokemon' }) {
-
     public id?: number;
     public name!: string;
     public types!: string[];
@@ -23,7 +21,9 @@ describe('Scenario: "custom methods"', () => {
     public async evolutions(): Promise<Pokemon[]> {
       if (this.id) {
         const list = await get(`api/pokemon/${this.id}/evolutions`);
-        return list.map((properties: JSON) => makeInstance(Pokemon, properties));
+        return list.map((properties: JSON) =>
+          makeInstance(Pokemon, properties)
+        );
       }
 
       return Promise.resolve([]);
@@ -49,7 +49,7 @@ describe('Scenario: "custom methods"', () => {
   beforeEach(() => {
     configureMadConnect({
       fetch: undefined,
-      middleware: [middleware.checkStatus, middleware.parseJSON],
+      middleware: [middleware.checkStatus, middleware.parseJSON]
     });
 
     const response = {
@@ -58,19 +58,19 @@ describe('Scenario: "custom methods"', () => {
         {
           id: 1,
           name: 'bulbasaur',
-          types: ['poison', 'grass'],
+          types: ['poison', 'grass']
         },
         {
           id: 2,
           name: 'ivysaur',
-          types: ['grass'],
+          types: ['grass']
         },
         {
           id: 3,
           name: 'venusaur',
-          types: ['grass', 'poison'],
-        },
-      ],
+          types: ['grass', 'poison']
+        }
+      ]
     };
     fetchMock.get('/api/pokemon/1/evolutions', response);
   });
@@ -79,7 +79,9 @@ describe('Scenario: "custom methods"', () => {
     fetchMock.restore();
   });
 
-  test('instance method', async done => {
+  test('instance method', async (done) => {
+    expect.assertions(13);
+
     const pokemon = new Pokemon();
     pokemon.id = 1;
 
@@ -109,7 +111,9 @@ describe('Scenario: "custom methods"', () => {
     }
   });
 
-  test('static method', async done => {
+  test('static method', async (done) => {
+    expect.assertions(13);
+
     const pokemonList = await Pokemon.evolutions(1);
 
     expect(pokemonList.length).toBe(3);
@@ -149,9 +153,10 @@ describe('Scenario: "custom methods"', () => {
 // Test that we can override methods of the Resource
 describe('Scenario: "override methods"', () => {
   describe('instance methods', () => {
-    test('save', async done => {
-      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
+    test('save', async (done) => {
+      expect.assertions(1);
 
+      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
         public id?: number;
         public name!: string;
         public types!: string[];
@@ -178,9 +183,10 @@ describe('Scenario: "override methods"', () => {
       done();
     });
 
-    test('remove', async done => {
-      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
+    test('remove', async (done) => {
+      expect.assertions(1);
 
+      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
         public id?: number;
         public name!: string;
         public types!: string[];
@@ -209,15 +215,18 @@ describe('Scenario: "override methods"', () => {
   });
 
   describe('static methods', () => {
-    test('one', async done => {
-      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
+    test('one', async (done) => {
+      expect.assertions(2);
 
+      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
         public id?: number;
         public name!: string;
         public types!: string[];
 
         // override static method
-        public static one(id: number, queryParams?: QueryParams): Promise<any> {
+        public static one(id: number): Promise<any> {
+          expect(id).toBe(1);
+
           const p = new Pokemon();
           p.id = 1337;
           return Promise.resolve(p);
@@ -230,15 +239,16 @@ describe('Scenario: "override methods"', () => {
       done();
     });
 
-    test('list', async done => {
-      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
+    test('list', async (done) => {
+      expect.assertions(1);
 
+      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
         public id?: number;
         public name!: string;
         public types!: string[];
 
         // override static method
-        public static list(queryParams?: QueryParams): Promise<any> {
+        public static list(): Promise<any> {
           const p = new Pokemon();
           p.id = 1337;
           return Promise.resolve(p);
@@ -251,15 +261,16 @@ describe('Scenario: "override methods"', () => {
       done();
     });
 
-    test('page', async done => {
-      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
+    test('page', async (done) => {
+      expect.assertions(1);
 
+      class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
         public id?: number;
         public name!: string;
         public types!: string[];
 
         // override static method
-        public static page(queryParams?: QueryParams): Promise<any> {
+        public static page(): Promise<any> {
           const p = new Pokemon();
           p.id = 1337;
           return Promise.resolve(p);
@@ -277,7 +288,6 @@ describe('Scenario: "override methods"', () => {
 // Test that we can extend methods of the Resource
 describe('Scenario: "extend methods"', () => {
   class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
-
     public id?: number;
     public name!: string;
     public types!: string[];
@@ -286,7 +296,7 @@ describe('Scenario: "extend methods"', () => {
   beforeEach(() => {
     configureMadConnect({
       fetch: undefined,
-      middleware: [middleware.checkStatus, middleware.parseJSON],
+      middleware: [middleware.checkStatus, middleware.parseJSON]
     });
   });
 
@@ -294,12 +304,14 @@ describe('Scenario: "extend methods"', () => {
     fetchMock.restore();
   });
 
-  test('instance method', async done => {
+  test('instance method', async (done) => {
+    expect.assertions(1);
+
     // extend instance method
     const originalSave = Pokemon.prototype.save;
 
-    Pokemon.prototype.save = function() {
-      return originalSave.apply(this).then(pokemon => {
+    Pokemon.prototype.save = function () {
+      return originalSave.apply(this).then((pokemon) => {
         pokemon.id = 1337;
         return pokemon;
       });
@@ -310,8 +322,8 @@ describe('Scenario: "extend methods"', () => {
       body: {
         id: 1,
         name: 'bulbasaur',
-        types: ['poison', 'grass'],
-      },
+        types: ['poison', 'grass']
+      }
     };
 
     fetchMock.put('/api/pokemon/1', response);
@@ -327,9 +339,11 @@ describe('Scenario: "extend methods"', () => {
     done();
   });
 
-  test('static method', async done => {
+  test('static method', async (done) => {
+    expect.assertions(1);
+
     const originalOne = Pokemon.one;
-    Pokemon.one = async function(id: number): Promise<any> {
+    Pokemon.one = async function (id: number): Promise<any> {
       const pokemon = await originalOne.bind(Pokemon)(id);
       pokemon.id = 42;
       return pokemon;
@@ -340,8 +354,8 @@ describe('Scenario: "extend methods"', () => {
       body: {
         id: 1,
         name: 'bulbasaur',
-        types: ['poison', 'grass'],
-      },
+        types: ['poison', 'grass']
+      }
     };
 
     fetchMock.get('/api/pokemon/1', response);
@@ -354,11 +368,12 @@ describe('Scenario: "extend methods"', () => {
 });
 
 // Test that we can override middleware
-test('Scenario: "custom success middleware"', async done => {
+test('Scenario: "custom success middleware"', async (done) => {
+  expect.assertions(2);
+
   let finished = false;
 
   class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
-
     public id?: number;
     public name!: string;
     public types!: string[];
@@ -366,10 +381,10 @@ test('Scenario: "custom success middleware"', async done => {
 
   function customMiddleware(promise: Promise<any>): Promise<any> {
     return promise
-      .then(response => {
+      .then((response) => {
         return response.json();
       })
-      .then(envelope => {
+      .then((envelope) => {
         if (envelope.statusCode === 200) {
           finished = true;
           return envelope.data;
@@ -381,13 +396,13 @@ test('Scenario: "custom success middleware"', async done => {
 
   configureMadConnect({
     fetch: undefined,
-    middleware: [customMiddleware],
+    middleware: [customMiddleware]
   });
 
   const response = {
     statusCode: 200,
     data: { id: 1 },
-    error: {},
+    error: {}
   };
   fetchMock.get('/api/pokemon/1', response);
 
@@ -402,9 +417,10 @@ test('Scenario: "custom success middleware"', async done => {
 });
 
 // Test that we can override middleware
-test('Scenario: "custom error middleware"', async done => {
-  class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
+test('Scenario: "custom error middleware"', async (done) => {
+  expect.assertions(2);
 
+  class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
     public id?: number;
     public name!: string;
     public types!: string[];
@@ -413,7 +429,7 @@ test('Scenario: "custom error middleware"', async done => {
   const showError = jest.fn();
 
   function customMiddleware(promise: Promise<any>): Promise<any> {
-    return promise.catch(error => {
+    return promise.catch((error) => {
       showError(error.message);
       return Promise.reject(error);
     });
@@ -421,7 +437,7 @@ test('Scenario: "custom error middleware"', async done => {
 
   configureMadConnect({
     fetch: undefined,
-    middleware: [middleware.checkStatus, middleware.parseJSON, customMiddleware],
+    middleware: [middleware.checkStatus, middleware.parseJSON, customMiddleware]
   });
 
   fetchMock.get('/api/pokemon/1', { status: 400 });

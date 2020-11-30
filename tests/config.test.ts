@@ -1,7 +1,14 @@
-import Config, { configureMadConnect, getConfig, getFetch, getMiddleware } from '../src/config';
+import Config, {
+  configureMadConnect,
+  getConfig,
+  getFetch,
+  getMiddleware
+} from '../src/config';
 import { checkStatus, parseJSON } from '../src/middleware';
 
-test('configuration lifecycle', async done => {
+test('configuration lifecycle', async (done) => {
+  expect.assertions(6);
+
   // By default it should use regular old fetch.
   expect(getConfig().fetch).toBe(window.fetch);
   expect(getFetch()).toBe(window.fetch);
@@ -12,8 +19,8 @@ test('configuration lifecycle', async done => {
   // Next we initialize the config.
   const config: Config = {
     fetch: fakeFetch,
-    // @ts-ignore
-    middleware: [1, 2, 3],
+    // @ts-expect-error Mock middleware as it is not important here
+    middleware: [1, 2, 3]
   };
 
   configureMadConnect(config);

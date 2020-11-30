@@ -1,7 +1,8 @@
 import merge from 'lodash.merge';
-import { get, post, put, remove as requestRemove, QueryParams } from './request';
+import { get, post, put, remove as requestRemove } from './request';
 
 import { Page } from './spring-models';
+import { QueryParams } from './types';
 import { makeInstance } from './utils';
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
@@ -45,7 +46,9 @@ export type Mapper<T> = (json: any, Class: { new (): T }) => T;
  * in which case it is a baseUrl, or an object containing the
  * baseUrl and a custom mapper.
  */
-export type MakeResourceConfig<T> = string | { baseUrl: string; mapper?: Mapper<T> };
+export type MakeResourceConfig<T> =
+  | string
+  | { baseUrl: string; mapper?: Mapper<T> };
 
 /**
  * Creates a new Resource class definition for the user to extend.
@@ -122,10 +125,12 @@ export function makeResource<T>(config: MakeResourceConfig<T>) {
         await requestRemove(`${baseUrl}/${this.id}`);
         this.id = undefined;
 
-        // @ts-ignore
+        // @ts-expect-error accept `this` as T
         return this;
       } else {
-        throw new Error('Cannot remove a Resource which has no id, this is a programmer error.');
+        throw new Error(
+          'Cannot remove a Resource which has no id, this is a programmer error.'
+        );
       }
     }
 
@@ -145,10 +150,13 @@ export function makeResource<T>(config: MakeResourceConfig<T>) {
      * @returns {Promise<T>} A Promise returning the Resource of type T.
      *
      */
-    public static async one(id: number | string, queryParams?: QueryParams): Promise<T> {
+    public static async one(
+      id: number | string,
+      queryParams?: QueryParams
+    ): Promise<T> {
       const json = await get(`${baseUrl}/${id}`, queryParams);
 
-      // @ts-ignore
+      // @ts-expect-error accept `this` as T
       return mapper(json, this);
     }
 
@@ -173,7 +181,7 @@ export function makeResource<T>(config: MakeResourceConfig<T>) {
         return undefined;
       }
 
-      // @ts-ignore
+      // @ts-expect-error accept `this` as T
       return mapper(json, this);
     }
 
@@ -196,7 +204,7 @@ export function makeResource<T>(config: MakeResourceConfig<T>) {
     public static async list(queryParams?: QueryParams): Promise<T[]> {
       const list = await get(baseUrl, queryParams);
       return list.map((properties: JSON) => {
-        // @ts-ignore
+        // @ts-expect-error accept `this` as T
         return mapper(properties, this);
       });
     }
@@ -218,7 +226,7 @@ export function makeResource<T>(config: MakeResourceConfig<T>) {
     public static async page(queryParams?: QueryParams): Promise<Page<T>> {
       const page = await get(baseUrl, queryParams);
       page.content = page.content.map((properties: JSON) => {
-        // @ts-ignore
+        // @ts-expect-error accept `this` as T
         return mapper(properties, this);
       });
       return page;

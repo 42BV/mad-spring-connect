@@ -1,12 +1,6 @@
 import { buildUrl, applyMiddleware } from './utils';
 import { getFetch } from './config';
-import { Method } from './middleware';
-
-export interface QueryParams {
-  [key: string]: unknown;
-}
-
-export type Payload = any;
+import { Method, Payload, QueryParams } from './types';
 
 /**
  * Does a GET request to the given url, with the query params if
@@ -27,7 +21,11 @@ export type Payload = any;
 export function get(url: string, queryParams?: QueryParams): Promise<any> {
   const finalUrl = buildUrl(url, queryParams);
 
-  return applyMiddleware(getFetch()(finalUrl), { url, queryParams, method: Method.GET });
+  return applyMiddleware(getFetch()(finalUrl), {
+    url,
+    queryParams,
+    method: 'GET'
+  });
 }
 
 /**
@@ -48,7 +46,7 @@ export function get(url: string, queryParams?: QueryParams): Promise<any> {
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
 export function post(url: string, payload: Payload): Promise<any> {
-  const method = Method.POST;
+  const method = 'POST';
 
   const options = optionsForMethodAndPayload(method, payload);
 
@@ -73,7 +71,7 @@ export function post(url: string, payload: Payload): Promise<any> {
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
 export function put(url: string, payload: Payload): Promise<any> {
-  const method = Method.PUT;
+  const method = 'PUT';
 
   const options = optionsForMethodAndPayload(method, payload);
 
@@ -98,7 +96,7 @@ export function put(url: string, payload: Payload): Promise<any> {
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
 export function patch(url: string, payload: Payload): Promise<any> {
-  const method = Method.PATCH;
+  const method = 'PATCH';
 
   const options = optionsForMethodAndPayload(method, payload);
 
@@ -125,34 +123,37 @@ export function patch(url: string, payload: Payload): Promise<any> {
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
 export function remove(url: string): Promise<any> {
-  const method = Method.DELETE;
+  const method = 'DELETE';
 
   const options = {
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    method,
+    method
   };
 
   return applyMiddleware(getFetch()(url, options), {
     url,
-    method,
+    method
   });
 }
 
-export function optionsForMethodAndPayload(method: Method, payload: Payload): RequestInit {
+export function optionsForMethodAndPayload(
+  method: Method,
+  payload: Payload
+): RequestInit {
   if (payload instanceof FormData) {
     return {
       body: payload,
-      method,
+      method
     };
   } else {
     return {
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload),
-      method,
+      method
     };
   }
 }

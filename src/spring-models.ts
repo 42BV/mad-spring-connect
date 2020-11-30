@@ -2,7 +2,7 @@
  * Represents Spring's page abstraction.
  *  @see {@link http://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/domain/Page.html}
  */
-export interface Page<T> {
+export type Page<T> = {
   content: T[];
   last: boolean;
   totalElements: number;
@@ -11,7 +11,7 @@ export interface Page<T> {
   number: number;
   first: boolean;
   numberOfElements: number;
-}
+};
 
 /**
  * Represents an empty Page useful for initializing variables while
@@ -26,6 +26,6 @@ export function emptyPage<T>(): Page<T> {
     size: 0,
     number: 0,
     first: true,
-    numberOfElements: 0,
+    numberOfElements: 0
   });
 }

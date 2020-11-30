@@ -4,13 +4,6 @@ describe('index', () => {
   test('exports', () => {
     expect(index).toMatchInlineSnapshot(`
       Object {
-        "Method": Object {
-          "DELETE": "DELETE",
-          "GET": "GET",
-          "PATCH": "PATCH",
-          "POST": "POST",
-          "PUT": "PUT",
-        },
         "applyMiddleware": [Function],
         "buildUrl": [Function],
         "checkStatus": [Function],
