@@ -63,11 +63,12 @@ export type MakeResourceConfig<T> =
  * }
  * ```
  *
- * @template T
+ * @template T The return type of the resource.
+ * @template ID The type for the id field of the resource defaults to number.
  * @param {string} baseUrl The baseUrl of the resource
  * @returns
  */
-export function makeResource<T>(config: MakeResourceConfig<T>) {
+export function makeResource<T, ID = number>(config: MakeResourceConfig<T>) {
   const baseUrl = typeof config === 'string' ? config : config.baseUrl;
 
   const mapper = getMapper(config);
@@ -78,7 +79,7 @@ export function makeResource<T>(config: MakeResourceConfig<T>) {
    * the Resource from the server.
    */
   return class {
-    public id?: number;
+    public id?: ID;
 
     /**
      * Either creates a new Resource by performing a POST when the id is
