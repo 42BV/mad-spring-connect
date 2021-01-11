@@ -452,3 +452,36 @@ test('Scenario: "custom error middleware"', async (done) => {
     done();
   }
 });
+
+test('Scenario: check that the ID can be any type', async (done) => {
+  expect.assertions(1);
+
+  class Pokemon extends makeResource<Pokemon, string>('/api/pokemon') {
+    public id?: string;
+    public name!: string;
+    public types!: string[];
+  }
+
+  const response = {
+    headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+    body: {
+      id: 'a-unique-uu-id-for-example',
+      name: 'bulbasaur',
+      types: ['poison', 'grass']
+    }
+  };
+
+  fetchMock.put('/api/pokemon/a-unique-uu-id-for-example', response);
+
+  const pokemon = new Pokemon();
+
+  // This should now work because the type of ID is now a string.
+  pokemon.id = 'a-unique-uu-id-for-example';
+  pokemon.name = 'bulbasaur';
+  pokemon.types = ['poison', 'grass'];
+
+  await pokemon.save();
+  expect(pokemon.id).toBe('a-unique-uu-id-for-example');
+
+  done();
+});
