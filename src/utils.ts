@@ -28,7 +28,7 @@ import { QueryParams, RequestInfo, Middleware } from './types';
  * @template T A class definition
  * @returns An instance of the Class with the properties set.
  */
-export function makeInstance<T>(Class: { new (): T }, properties: object): T {
+export function makeInstance<T>(Class: { new (): T }, properties: Record<string, unknown>): T {
   const instance = new Class();
   return merge(instance, properties);
 }
@@ -43,10 +43,8 @@ export function buildUrl(url: string, queryParams?: QueryParams): string {
   }
 }
 
-export function applyMiddleware(
-  promise: Promise<any>,
-  requestInfo: RequestInfo
-): Promise<any> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function applyMiddleware(promise: Promise<any>, requestInfo: RequestInfo): Promise<any> {
   const middleware: Middleware[] = getMiddleware();
 
   let nextPromise = promise;

@@ -35,11 +35,11 @@ import { makeInstance } from './utils';
  * A Mapper takes JSON and converts it to type T.
  *
  * @template T
- * @param {any} json The JSON this mapper converts to type T.
+ * @param {never} json The JSON this mapper converts to type T.
  * @param {Class} Class The class definition of the Resource
  * @returns
  */
-export type Mapper<T> = (json: any, Class: { new (): T }) => T;
+export type Mapper<T> = (json: never, Class: { new (): T }) => T;
 
 /**
  * Config object to declare the Resource with. Is either a string
@@ -68,6 +68,7 @@ export type MakeResourceConfig<T> =
  * @param {string} baseUrl The baseUrl of the resource
  * @returns
  */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function makeResource<T, ID = number>(config: MakeResourceConfig<T>) {
   const baseUrl = typeof config === 'string' ? config : config.baseUrl;
 
@@ -99,9 +100,11 @@ export function makeResource<T, ID = number>(config: MakeResourceConfig<T>) {
       let json: T;
 
       if (this.id) {
-        json = await put(`${baseUrl}/${this.id}`, this);
+        // @ts-expect-error Type of itself is always T
+        json = await put<T>(`${baseUrl}/${this.id}`, this);
       } else {
-        json = await post(`${baseUrl}`, this);
+        // @ts-expect-error Type of itself is always T
+        json = await post<T>(`${baseUrl}`, this);
       }
 
       return merge(this, json);
@@ -176,9 +179,9 @@ export function makeResource<T, ID = number>(config: MakeResourceConfig<T>) {
      * @returns {Promise<T | void>} A Promise returning the Resource of type T or undefined.
      */
     public static async findOne(queryParams: QueryParams): Promise<T | void> {
-      const json = await get(baseUrl, queryParams);
+      const json = await get<T>(baseUrl, queryParams);
 
-      if (json.constructor === Object && Object.keys(json).length === 0) {
+      if (typeof json !== 'object' || json === null || Array.isArray(json) || Object.keys(json).length === 0) {
         return undefined;
       }
 
@@ -203,8 +206,8 @@ export function makeResource<T, ID = number>(config: MakeResourceConfig<T>) {
      * @memberOf Resource
      */
     public static async list(queryParams?: QueryParams): Promise<T[]> {
-      const list = await get(baseUrl, queryParams);
-      return list.map((properties: JSON) => {
+      const list = await get<T[]>(baseUrl, queryParams);
+      return list.map((properties: T) => {
         // @ts-expect-error accept `this` as T
         return mapper(properties, this);
       });
@@ -225,11 +228,12 @@ export function makeResource<T, ID = number>(config: MakeResourceConfig<T>) {
      * @returns {Promise<Page<T>>} A Promise returning the Resource of type Page<T>.
      */
     public static async page(queryParams?: QueryParams): Promise<Page<T>> {
-      const page = await get(baseUrl, queryParams);
-      page.content = page.content.map((properties: JSON) => {
+      const page = await get<Page<T>>(baseUrl, queryParams);
+      page.content = page.content.map((properties: T) => {
         // @ts-expect-error accept `this` as T
         return mapper(properties, this);
       });
+
       return page;
     }
   };
@@ -250,6 +254,6 @@ function getMapper<T>(config: MakeResourceConfig<T>): Mapper<T> {
  * The default mapper uses `makeInstance` to convert the JSON
  * to a T.
  */
-function defaultMapper<T>(json: JSON, Class: { new (): T }): T {
+function defaultMapper<T>(json: Record<string, unknown>, Class: { new (): T }): T {
   return makeInstance(Class, json);
 }

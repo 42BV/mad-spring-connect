@@ -5,12 +5,19 @@ import { makeResource } from '../src/resource';
 import { makeInstance } from '../src/utils';
 
 describe('Resource', () => {
+  type PokemonResult = {
+    id: number;
+    name: string;
+    types: string[];
+  };
+
   class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
     public id?: number;
     public name!: string;
     public types!: string[];
   }
 
+  // @ts-expect-error Test mock
   class Pokeball extends makeResource<Pokeball>({
     baseUrl: '/api/pokeball',
     mapper: pokeballMapper
@@ -20,9 +27,20 @@ describe('Resource', () => {
     public retrievedAt!: Date;
   }
 
-  function pokeballMapper(json: any, Class: { new (): Pokeball }): Pokeball {
+  type PokeballResult = {
+    id: number;
+    pokemon: PokemonResult;
+    retrievedAt: string;
+  };
+
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  function pokeballMapper(
+    json: PokeballResult,
+    Class: { new (): Pokeball }
+  ): Pokeball {
     const pokeball = makeInstance(Class, json);
     pokeball.retrievedAt = new Date();
+    // @ts-expect-error Type of pokemon is not unknown
     pokeball.pokemon = makeInstance(Pokemon, pokeball.pokemon);
     return pokeball;
   }
@@ -39,7 +57,7 @@ describe('Resource', () => {
   });
 
   describe('save', () => {
-    test('create', async (done) => {
+    test('create', async () => {
       expect.assertions(5);
 
       const response = {
@@ -67,11 +85,9 @@ describe('Resource', () => {
 
       const { body } = fetchMock.lastOptions() ?? { body: '' };
       expect(body).toBe(`{"name":"bulbasaur","types":["poison","grass"]}`);
-
-      done();
     });
 
-    test('update', async (done) => {
+    test('update', async () => {
       expect.assertions(5);
 
       const response = {
@@ -101,13 +117,11 @@ describe('Resource', () => {
       expect(body).toBe(
         `{"id":1,"name":"bulbasaur","types":["poison","grass"]}`
       );
-
-      done();
     });
   });
 
   describe('remove', () => {
-    test('has id', async (done) => {
+    test('has id', async () => {
       expect.assertions(4);
 
       fetchMock.delete('/api/pokemon/1', {
@@ -126,11 +140,9 @@ describe('Resource', () => {
       expect(pokemon.id).toBe(undefined);
       expect(pokemon.name).toBe('bulbasaur');
       expect(pokemon.types).toEqual(['poison', 'grass']);
-
-      done();
     });
 
-    test('does not have id', async (done) => {
+    test('does not have id', async () => {
       expect.assertions(1);
 
       const pokemon = new Pokemon();
@@ -143,13 +155,12 @@ describe('Resource', () => {
         expect(error.message).toBe(
           'Cannot remove a Resource which has no id, this is a programmer error.'
         );
-        done();
       }
     });
   });
 
   describe('one', () => {
-    test('without query params', async (done) => {
+    test('without query params', async () => {
       expect.assertions(4);
 
       const response = {
@@ -169,11 +180,9 @@ describe('Resource', () => {
       expect(pokemon.id).toBe(1);
       expect(pokemon.name).toBe('bulbasaur');
       expect(pokemon.types).toEqual(['poison', 'grass']);
-
-      done();
     });
 
-    test('with query params', async (done) => {
+    test('with query params', async () => {
       expect.assertions(4);
 
       const response = {
@@ -193,11 +202,9 @@ describe('Resource', () => {
       expect(pokemon.id).toBe(1);
       expect(pokemon.name).toBe('bulbasaur');
       expect(pokemon.types).toEqual(['poison', 'grass']);
-
-      done();
     });
 
-    test('with id which is a string', async (done) => {
+    test('with id which is a string', async () => {
       expect.assertions(4);
 
       const response = {
@@ -217,11 +224,9 @@ describe('Resource', () => {
       expect(pokemon.id).toBe(1);
       expect(pokemon.name).toBe('bulbasaur');
       expect(pokemon.types).toEqual(['poison', 'grass']);
-
-      done();
     });
 
-    test('with custom mapper', async (done) => {
+    test('with custom mapper', async () => {
       expect.assertions(7);
 
       const response = {
@@ -236,6 +241,7 @@ describe('Resource', () => {
 
       fetchMock.get('/api/pokeball/1', response);
 
+      // @ts-expect-error Test mock
       const pokeball = await Pokeball.one(1);
 
       expect(pokeball instanceof Pokeball).toBe(true);
@@ -248,30 +254,50 @@ describe('Resource', () => {
       expect(pokemon.id).toBe(1);
       expect(pokemon.name).toBe('bulbasaur');
       expect(pokemon.types).toEqual(['poison', 'grass']);
-
-      done();
     });
   });
 
   describe('findOne', () => {
-    test('when resource does not exist', async (done) => {
-      expect.assertions(1);
-
-      const response = {
-        body: {},
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
-      };
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async function expectPokemonFindOneUndefined(response: {
+      body: any;
+      headers: { [key: string]: string };
+    }) {
       fetchMock.get('/api/pokemon?name=bulbasaur', response);
 
       const pokemon = await Pokemon.findOne({ name: 'bulbasaur' });
 
       expect(pokemon).toBe(undefined);
+    }
 
-      done();
+    test('when response is an empty object', async () => {
+      expect.assertions(1);
+
+      await expectPokemonFindOneUndefined({
+        body: {},
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+      });
     });
 
-    test('when resource exists', async (done) => {
+    test('when response is an empty array', async () => {
+      expect.assertions(1);
+
+      await expectPokemonFindOneUndefined({
+        body: [],
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+      });
+    });
+
+    test('when response is a filled array', async () => {
+      expect.assertions(1);
+
+      await expectPokemonFindOneUndefined({
+        body: [1, 2, 3],
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+      });
+    });
+
+    test('when resource exists', async () => {
       expect.assertions(4);
 
       const response = {
@@ -292,14 +318,10 @@ describe('Resource', () => {
         expect(pokemon.id).toBe(1);
         expect(pokemon.name).toBe('bulbasaur');
         expect(pokemon.types).toEqual(['poison', 'grass']);
-      } else {
-        done.fail();
       }
-
-      done();
     });
 
-    test('with custom mapper', async (done) => {
+    test('with custom mapper', async () => {
       expect.assertions(7);
 
       const response = {
@@ -314,6 +336,7 @@ describe('Resource', () => {
 
       fetchMock.get('/api/pokeball?name=bulbasaur', response);
 
+      // @ts-expect-error Test mock
       const pokeball = await Pokeball.findOne({ name: 'bulbasaur' });
 
       if (pokeball) {
@@ -327,16 +350,12 @@ describe('Resource', () => {
         expect(pokemon.id).toBe(1);
         expect(pokemon.name).toBe('bulbasaur');
         expect(pokemon.types).toEqual(['poison', 'grass']);
-      } else {
-        done.fail();
       }
-
-      done();
     });
   });
 
   describe('list', () => {
-    test('without query params', async (done) => {
+    test('without query params', async () => {
       expect.assertions(13);
 
       const response = {
@@ -381,11 +400,9 @@ describe('Resource', () => {
       expect(venusaur.id).toBe(3);
       expect(venusaur.name).toBe('venusaur');
       expect(venusaur.types).toEqual(['grass', 'poison']);
-
-      done();
     });
 
-    test('with query params', async (done) => {
+    test('with query params', async () => {
       expect.assertions(13);
 
       const response = {
@@ -430,11 +447,9 @@ describe('Resource', () => {
       expect(venusaur.id).toBe(3);
       expect(venusaur.name).toBe('venusaur');
       expect(venusaur.types).toEqual(['grass', 'poison']);
-
-      done();
     });
 
-    test('with custom mapper', async (done) => {
+    test('with custom mapper', async () => {
       expect.assertions(22);
 
       const response = {
@@ -469,6 +484,7 @@ describe('Resource', () => {
       };
       fetchMock.get('/api/pokeball', response);
 
+      // @ts-expect-error Test mock
       const pokeballList = await Pokeball.list();
 
       expect(pokeballList.length).toBe(3);
@@ -507,13 +523,11 @@ describe('Resource', () => {
       expect(venusaur.id).toBe(3);
       expect(venusaur.name).toBe('venusaur');
       expect(venusaur.types).toEqual(['grass', 'poison']);
-
-      done();
     });
   });
 
   describe('page', () => {
-    test('without query params', async (done) => {
+    test('without query params', async () => {
       expect.assertions(13);
 
       const content = [
@@ -570,11 +584,9 @@ describe('Resource', () => {
       expect(venusaur.id).toBe(3);
       expect(venusaur.name).toBe('venusaur');
       expect(venusaur.types).toEqual(['grass', 'poison']);
-
-      done();
     });
 
-    test('with query params', async (done) => {
+    test('with query params', async () => {
       expect.assertions(13);
 
       const content = [
@@ -631,11 +643,9 @@ describe('Resource', () => {
       expect(venusaur.id).toBe(3);
       expect(venusaur.name).toBe('venusaur');
       expect(venusaur.types).toEqual(['grass', 'poison']);
-
-      done();
     });
 
-    test('with custom mapper', async (done) => {
+    test('with custom mapper', async () => {
       expect.assertions(22);
 
       const content = [
@@ -682,6 +692,7 @@ describe('Resource', () => {
 
       fetchMock.get('/api/pokeball?page=1', response);
 
+      // @ts-expect-error Test mock
       const pokeballPage = await Pokeball.page({ page: 1 });
 
       expect(pokeballPage.content.length).toBe(3);
@@ -720,8 +731,6 @@ describe('Resource', () => {
       expect(venusaur.id).toBe(3);
       expect(venusaur.name).toBe('venusaur');
       expect(venusaur.types).toEqual(['grass', 'poison']);
-
-      done();
     });
   });
 });

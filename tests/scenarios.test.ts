@@ -21,9 +21,8 @@ describe('Scenario: "custom methods"', () => {
     public async evolutions(): Promise<Pokemon[]> {
       if (this.id) {
         const list = await get(`api/pokemon/${this.id}/evolutions`);
-        return list.map((properties: JSON) =>
-          makeInstance(Pokemon, properties)
-        );
+        // @ts-expect-error Type of list is not unknown
+        return list.map((properties) => makeInstance(Pokemon, properties));
       }
 
       return Promise.resolve([]);
@@ -32,9 +31,8 @@ describe('Scenario: "custom methods"', () => {
     // Add custom static method
     public static async evolutions(id: number): Promise<Pokemon[]> {
       const list = await get(`api/pokemon/${id}/evolutions`);
-      return list.map((properties: JSON) => {
-        return makeInstance(Pokemon, properties);
-      });
+      // @ts-expect-error Type of list is not unknown
+      return list.map((properties: JSON) => makeInstance(Pokemon, properties));
     }
 
     public get firstType(): string | undefined {
@@ -79,7 +77,7 @@ describe('Scenario: "custom methods"', () => {
     fetchMock.restore();
   });
 
-  test('instance method', async (done) => {
+  test('instance method', async () => {
     expect.assertions(13);
 
     const pokemon = new Pokemon();
@@ -106,12 +104,10 @@ describe('Scenario: "custom methods"', () => {
       expect(venusaur.id).toBe(3);
       expect(venusaur.name).toBe('venusaur');
       expect(venusaur.types).toEqual(['grass', 'poison']);
-
-      done();
     }
   });
 
-  test('static method', async (done) => {
+  test('static method', async () => {
     expect.assertions(13);
 
     const pokemonList = await Pokemon.evolutions(1);
@@ -134,8 +130,6 @@ describe('Scenario: "custom methods"', () => {
     expect(venusaur.id).toBe(3);
     expect(venusaur.name).toBe('venusaur');
     expect(venusaur.types).toEqual(['grass', 'poison']);
-
-    done();
   });
 
   test('getter method', () => {
@@ -153,7 +147,7 @@ describe('Scenario: "custom methods"', () => {
 // Test that we can override methods of the Resource
 describe('Scenario: "override methods"', () => {
   describe('instance methods', () => {
-    test('save', async (done) => {
+    test('save', async () => {
       expect.assertions(1);
 
       class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
@@ -179,11 +173,9 @@ describe('Scenario: "override methods"', () => {
 
       const p = await pokemon.save();
       expect(p.id).toBe(42);
-
-      done();
     });
 
-    test('remove', async (done) => {
+    test('remove', async () => {
       expect.assertions(1);
 
       class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
@@ -209,13 +201,11 @@ describe('Scenario: "override methods"', () => {
 
       const p = await pokemon.remove();
       expect(p.id).toBe(42);
-
-      done();
     });
   });
 
   describe('static methods', () => {
-    test('one', async (done) => {
+    test('one', async () => {
       expect.assertions(2);
 
       class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
@@ -235,11 +225,9 @@ describe('Scenario: "override methods"', () => {
 
       const p = await Pokemon.one(1);
       expect(p.id).toBe(1337);
-
-      done();
     });
 
-    test('list', async (done) => {
+    test('list', async () => {
       expect.assertions(1);
 
       class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
@@ -257,11 +245,9 @@ describe('Scenario: "override methods"', () => {
 
       const p = await Pokemon.list();
       expect(p.id).toBe(1337);
-
-      done();
     });
 
-    test('page', async (done) => {
+    test('page', async () => {
       expect.assertions(1);
 
       class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
@@ -279,8 +265,6 @@ describe('Scenario: "override methods"', () => {
 
       const p = await Pokemon.page();
       expect(p.id).toBe(1337);
-
-      done();
     });
   });
 });
@@ -304,7 +288,7 @@ describe('Scenario: "extend methods"', () => {
     fetchMock.restore();
   });
 
-  test('instance method', async (done) => {
+  test('instance method', async () => {
     expect.assertions(1);
 
     // extend instance method
@@ -335,15 +319,13 @@ describe('Scenario: "extend methods"', () => {
 
     await pokemon.save();
     expect(pokemon.id).toBe(1337);
-
-    done();
   });
 
-  test('static method', async (done) => {
+  test('static method', async () => {
     expect.assertions(1);
 
     const originalOne = Pokemon.one;
-    Pokemon.one = async function (id: number): Promise<any> {
+    Pokemon.one = async function (id: number): Promise<Pokemon> {
       const pokemon = await originalOne.bind(Pokemon)(id);
       pokemon.id = 42;
       return pokemon;
@@ -362,13 +344,11 @@ describe('Scenario: "extend methods"', () => {
 
     const p = await Pokemon.one(1);
     expect(p.id).toBe(42);
-
-    done();
   });
 });
 
 // Test that we can override middleware
-test('Scenario: "custom success middleware"', async (done) => {
+test('Scenario: "custom success middleware"', async () => {
   expect.assertions(2);
 
   let finished = false;
@@ -379,9 +359,10 @@ test('Scenario: "custom success middleware"', async (done) => {
     public types!: string[];
   }
 
-  function customMiddleware(promise: Promise<any>): Promise<any> {
+  function customMiddleware(promise: Promise<unknown>): Promise<unknown> {
     return promise
       .then((response) => {
+        // @ts-expect-error Test mock
         return response.json();
       })
       .then((envelope) => {
@@ -412,12 +393,10 @@ test('Scenario: "custom success middleware"', async (done) => {
   fetchMock.restore();
 
   expect(finished).toBe(true);
-
-  done();
 });
 
 // Test that we can override middleware
-test('Scenario: "custom error middleware"', async (done) => {
+test('Scenario: "custom error middleware"', async () => {
   expect.assertions(2);
 
   class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
@@ -428,7 +407,7 @@ test('Scenario: "custom error middleware"', async (done) => {
 
   const showError = jest.fn();
 
-  function customMiddleware(promise: Promise<any>): Promise<any> {
+  function customMiddleware(promise: Promise<unknown>): Promise<unknown> {
     return promise.catch((error) => {
       showError(error.message);
       return Promise.reject(error);
@@ -449,11 +428,10 @@ test('Scenario: "custom error middleware"', async (done) => {
     expect(showError).toHaveBeenCalledWith('Bad Request');
 
     fetchMock.restore();
-    done();
   }
 });
 
-test('Scenario: check that the ID can be any type', async (done) => {
+test('Scenario: check that the ID can be any type', async () => {
   expect.assertions(1);
 
   class Pokemon extends makeResource<Pokemon, string>('/api/pokemon') {
@@ -482,6 +460,4 @@ test('Scenario: check that the ID can be any type', async (done) => {
 
   await pokemon.save();
   expect(pokemon.id).toBe('a-unique-uu-id-for-example');
-
-  done();
 });

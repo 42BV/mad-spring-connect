@@ -18,7 +18,7 @@ import { Method, Payload, QueryParams } from './types';
  * @param {QueryParams} queryParams Optional query params as an object.
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
-export function get(url: string, queryParams?: QueryParams): Promise<any> {
+export function get<T>(url: string, queryParams?: QueryParams): Promise<T> {
   const finalUrl = buildUrl(url, queryParams);
 
   return applyMiddleware(getFetch()(finalUrl), {
@@ -45,10 +45,10 @@ export function get(url: string, queryParams?: QueryParams): Promise<any> {
  * @param {Payload} payload The payload you want to send to the server.
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
-export function post(url: string, payload: Payload): Promise<any> {
+export function post<T>(url: string, payload: Payload<T>): Promise<unknown> {
   const method = 'POST';
 
-  const options = optionsForMethodAndPayload(method, payload);
+  const options = optionsForMethodAndPayload<T>(method, payload);
 
   return applyMiddleware(getFetch()(url, options), { url, payload, method });
 }
@@ -70,7 +70,7 @@ export function post(url: string, payload: Payload): Promise<any> {
  * @param {Payload} payload The payload you want to send to the server.
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
-export function put(url: string, payload: Payload): Promise<any> {
+export function put<T>(url: string, payload: Payload<T>): Promise<T> {
   const method = 'PUT';
 
   const options = optionsForMethodAndPayload(method, payload);
@@ -95,7 +95,7 @@ export function put(url: string, payload: Payload): Promise<any> {
  * @param {Payload} payload The payload you want to send to the server.
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
-export function patch(url: string, payload: Payload): Promise<any> {
+export function patch<T>(url: string, payload: Payload<T>): Promise<T> {
   const method = 'PATCH';
 
   const options = optionsForMethodAndPayload(method, payload);
@@ -122,7 +122,7 @@ export function patch(url: string, payload: Payload): Promise<any> {
  * @param {string} url  The url you want to send a DELETE request to.
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
-export function remove(url: string): Promise<any> {
+export function remove<T>(url: string): Promise<T> {
   const method = 'DELETE';
 
   const options = {
@@ -138,9 +138,9 @@ export function remove(url: string): Promise<any> {
   });
 }
 
-export function optionsForMethodAndPayload(
+export function optionsForMethodAndPayload<T>(
   method: Method,
-  payload: Payload
+  payload: Payload<T>
 ): RequestInit {
   if (payload instanceof FormData) {
     return {

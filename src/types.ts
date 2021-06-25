@@ -14,7 +14,7 @@ export type QueryParams = StringifiableRecord;
  * Represents a payload to be sent as the body on a PATCH, PUT or
  * POST request. Is either a FormData or some other object.
  */
-export type Payload = any;
+export type Payload<T> = Record<string, unknown> | FormData | T;
 
 /**
  * Contains all the info of the request that was made. This way when

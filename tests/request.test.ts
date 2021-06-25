@@ -26,7 +26,7 @@ describe('requests', () => {
   });
 
   describe('get', () => {
-    test('200: without query parameters', async (done) => {
+    test('200: without query parameters', async () => {
       expect.assertions(4);
 
       fetchMock.get('/api/pokemon/1', {
@@ -41,11 +41,9 @@ describe('requests', () => {
         method: 'GET',
         options: undefined
       });
-
-      done();
     });
 
-    test('200: with query parameters', async (done) => {
+    test('200: with query parameters', async () => {
       expect.assertions(4);
 
       const options = {
@@ -63,11 +61,9 @@ describe('requests', () => {
           page: 1
         }
       });
-
-      done();
     });
 
-    test('500: server error', async (done) => {
+    test('500: server error', async () => {
       expect.assertions(5);
 
       fetchMock.get('/api/pokemon?page=1', 500);
@@ -75,7 +71,6 @@ describe('requests', () => {
       const options = { page: 1 };
       try {
         await get('/api/pokemon', options);
-        fail();
       } catch (e) {
         expect(e.message).toBe('Internal Server Error');
         expect(e.response).not.toBe(undefined);
@@ -86,12 +81,10 @@ describe('requests', () => {
             page: 1
           }
         });
-
-        done();
       }
     });
 
-    test('200: parse error', async (done) => {
+    test('200: parse error', async () => {
       expect.assertions(4);
 
       fetchMock.get('/api/pokemon?page=1', {
@@ -102,7 +95,6 @@ describe('requests', () => {
       const options = { page: 1 };
       try {
         await get('/api/pokemon', options);
-        fail();
       } catch (e) {
         expect(e.message).toBe(
           'invalid json response body at /api/pokemon?page=1 reason: Unexpected token } in JSON at position 2'
@@ -114,14 +106,12 @@ describe('requests', () => {
             page: 1
           }
         });
-
-        done();
       }
     });
   });
 
   describe('post', () => {
-    test('200', async (done) => {
+    test('200', async () => {
       expect.assertions(6);
 
       const options = {
@@ -145,11 +135,9 @@ describe('requests', () => {
           name: 'bulbasaur'
         }
       });
-
-      done();
     });
 
-    test('500: server error', async (done) => {
+    test('500: server error', async () => {
       expect.assertions(7);
 
       fetchMock.post('/api/pokemon', 500);
@@ -157,7 +145,6 @@ describe('requests', () => {
       const payload = { name: 'bulbasaur' };
       try {
         await post('/api/pokemon', payload);
-        fail();
       } catch (e) {
         // @ts-expect-error mock lastOptions because header and body are not defined
         const { headers, body } = fetchMock.lastOptions();
@@ -172,12 +159,10 @@ describe('requests', () => {
           method: 'POST',
           payload
         });
-
-        done();
       }
     });
 
-    test('200: parse error', async (done) => {
+    test('200: parse error', async () => {
       expect.assertions(6);
 
       fetchMock.post('/api/pokemon', {
@@ -187,7 +172,6 @@ describe('requests', () => {
 
       try {
         await post('/api/pokemon', { name: 'bulbasaur' });
-        fail();
       } catch (e) {
         // @ts-expect-error mock lastOptions because header and body are not defined
         const { headers, body } = fetchMock.lastOptions();
@@ -202,13 +186,11 @@ describe('requests', () => {
           method: 'POST',
           payload: { name: 'bulbasaur' }
         });
-
-        done();
       }
     });
 
-    test('200: custom payload', async (done) => {
-      expect.assertions(7);
+    test('200: custom payload', async () => {
+      expect.assertions(6);
 
       const options = {
         body: { id: 1 },
@@ -245,13 +227,12 @@ describe('requests', () => {
         const reader = new FileReader();
         reader.onload = function () {
           expect(reader.result).toBe(`{"name":"bulbasaur"}`);
-          done();
         };
         reader.readAsText(value);
       }
     });
 
-    test('200: primitive payload', async (done) => {
+    test('200: primitive payload', async () => {
       expect.assertions(6);
 
       const options = {
@@ -273,13 +254,11 @@ describe('requests', () => {
         method: 'POST',
         payload: true
       });
-
-      done();
     });
   });
 
   describe('put', () => {
-    test('200', async (done) => {
+    test('200', async () => {
       expect.assertions(6);
 
       fetchMock.put('/api/pokemon/1', {
@@ -300,18 +279,15 @@ describe('requests', () => {
         method: 'PUT',
         payload: { name: 'bulbasaur' }
       });
-
-      done();
     });
 
-    test('500: server error', async (done) => {
+    test('500: server error', async () => {
       expect.assertions(7);
 
       fetchMock.put('/api/pokemon/1', 500);
 
       try {
         await put('/api/pokemon/1', { name: 'bulbasaur' });
-        fail();
       } catch (e) {
         // @ts-expect-error mock lastOptions because header and body are not defined
         const { body, headers } = fetchMock.lastOptions();
@@ -327,12 +303,10 @@ describe('requests', () => {
           method: 'PUT',
           payload: { name: 'bulbasaur' }
         });
-
-        done();
       }
     });
 
-    test('200: parse error', async (done) => {
+    test('200: parse error', async () => {
       expect.assertions(6);
 
       fetchMock.put('/api/pokemon/1', {
@@ -342,7 +316,6 @@ describe('requests', () => {
 
       try {
         await put('/api/pokemon/1', { name: 'bulbasaur' });
-        fail();
       } catch (e) {
         // @ts-expect-error mock lastOptions because header and body are not defined
         const { body, headers } = fetchMock.lastOptions();
@@ -358,13 +331,11 @@ describe('requests', () => {
           method: 'PUT',
           payload: { name: 'bulbasaur' }
         });
-
-        done();
       }
     });
 
-    test('200: custom payload', async (done) => {
-      expect.assertions(7);
+    test('200: custom payload', async () => {
+      expect.assertions(6);
 
       const options = {
         body: { id: 1 },
@@ -401,13 +372,12 @@ describe('requests', () => {
         const reader = new FileReader();
         reader.onload = function () {
           expect(reader.result).toBe(`{"name":"bulbasaur"}`);
-          done();
         };
         reader.readAsText(value);
       }
     });
 
-    test('200: primitive payload', async (done) => {
+    test('200: primitive payload', async () => {
       expect.assertions(6);
 
       fetchMock.put('/api/pokemon/1', {
@@ -428,13 +398,11 @@ describe('requests', () => {
         method: 'PUT',
         payload: 10
       });
-
-      done();
     });
   });
 
   describe('patch', () => {
-    test('200', async (done) => {
+    test('200', async () => {
       expect.assertions(6);
 
       fetchMock.patch('/api/pokemon/1', {
@@ -455,18 +423,15 @@ describe('requests', () => {
         method: 'PATCH',
         payload: { name: 'bulbasaur' }
       });
-
-      done();
     });
 
-    test('500: server error', async (done) => {
+    test('500: server error', async () => {
       expect.assertions(7);
 
       fetchMock.patch('/api/pokemon/1', 500);
 
       try {
         await patch('/api/pokemon/1', { name: 'bulbasaur' });
-        fail();
       } catch (e) {
         // @ts-expect-error mock lastOptions because header and body are not defined
         const { body, headers } = fetchMock.lastOptions();
@@ -482,12 +447,10 @@ describe('requests', () => {
           method: 'PATCH',
           payload: { name: 'bulbasaur' }
         });
-
-        done();
       }
     });
 
-    test('200: parse error', async (done) => {
+    test('200: parse error', async () => {
       expect.assertions(6);
 
       fetchMock.patch('/api/pokemon/1', {
@@ -497,7 +460,6 @@ describe('requests', () => {
 
       try {
         await patch('/api/pokemon/1', { name: 'bulbasaur' });
-        fail();
       } catch (e) {
         // @ts-expect-error mock lastOptions because header and body are not defined
         const { body, headers } = fetchMock.lastOptions();
@@ -513,13 +475,11 @@ describe('requests', () => {
           method: 'PATCH',
           payload: { name: 'bulbasaur' }
         });
-
-        done();
       }
     });
 
-    test('200: custom payload', async (done) => {
-      expect.assertions(7);
+    test('200: custom payload', async () => {
+      expect.assertions(6);
 
       const options = {
         body: { id: 1 },
@@ -556,13 +516,12 @@ describe('requests', () => {
         const reader = new FileReader();
         reader.onload = function () {
           expect(reader.result).toBe(`{"name":"bulbasaur"}`);
-          done();
         };
         reader.readAsText(value);
       }
     });
 
-    test('200: primitive payload', async (done) => {
+    test('200: primitive payload', async () => {
       expect.assertions(6);
 
       fetchMock.patch('/api/pokemon/1', {
@@ -583,13 +542,11 @@ describe('requests', () => {
         method: 'PATCH',
         payload: 'si'
       });
-
-      done();
     });
   });
 
   describe('remove', () => {
-    test('200', async (done) => {
+    test('200', async () => {
       expect.assertions(5);
 
       fetchMock.delete('/api/pokemon/1', {
@@ -609,18 +566,15 @@ describe('requests', () => {
         method: 'DELETE',
         payload: undefined
       });
-
-      done();
     });
 
-    test('500: server error', async (done) => {
+    test('500: server error', async () => {
       expect.assertions(6);
 
       fetchMock.delete('/api/pokemon/1', 500);
 
       try {
         await remove('/api/pokemon/1');
-        fail();
       } catch (e) {
         // @ts-expect-error mock lastOptions because header and body are not defined
         const { headers } = fetchMock.lastOptions();
@@ -634,12 +588,10 @@ describe('requests', () => {
           method: 'DELETE',
           payload: undefined
         });
-
-        done();
       }
     });
 
-    test('200: parse error', async (done) => {
+    test('200: parse error', async () => {
       expect.assertions(5);
 
       fetchMock.delete('/api/pokemon/1', {
@@ -649,7 +601,6 @@ describe('requests', () => {
 
       try {
         await remove('/api/pokemon/1');
-        fail();
       } catch (e) {
         // @ts-expect-error mock lastOptions because header and body are not defined
         const { headers } = fetchMock.lastOptions();
@@ -664,8 +615,6 @@ describe('requests', () => {
           method: 'DELETE',
           payload: undefined
         });
-
-        done();
       }
     });
   });

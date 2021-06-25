@@ -8,11 +8,9 @@
 export class ErrorWithResponse extends Error {
   public response: Response;
 
-  // For some reason istanbul thinks the super call is untested.
-  // https://github.com/gotwarlost/istanbul/issues/690
-  /* istanbul ignore next */
   public constructor(response: Response) {
-    super(response.statusText);
+    super(response.statusText) /* istanbul ignore next */;
+
     this.response = response;
   }
 }
@@ -57,7 +55,7 @@ export async function checkStatus(
  * @return {Promise<any>} the JSON representation of the response body.
  * @throws {Error} An Error indicating that the JSON could not be parsed.
  */
-export async function parseJSON(promise: Promise<Response>): Promise<any> {
+export async function parseJSON(promise: Promise<Response>): Promise<unknown> {
   const response = await promise;
   if (response.status === 204) {
     return Promise.resolve({});
