@@ -1,0 +1,120 @@
+I"O.<h2 id="41-a-crud-scenario">4.1 A CRUD scenario</h2>
+
+<p>Once you have a <code class="highlighter-rouge">Pokemon</code> instance, either retrieved via <code class="highlighter-rouge">one</code>, <code class="highlighter-rouge">list</code>
+or <code class="highlighter-rouge">page</code>, or simply instantiated. You can save that Pokemon by calling
+<code class="highlighter-rouge">save</code>.</p>
+
+<p>It will then either creates a new Pokemon by performing a <code class="highlighter-rouge">POST</code> when the id is
+empty, or updates an existing resource via a <code class="highlighter-rouge">PUT</code> request when the
+id exists.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 
+  First create a pokemon by creating a new instance. 
+  Or alternatively fetch the pokemon using `one`.
+*/</span>
+<span class="kd">const</span> <span class="nx">pokemon</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Pokemon</span><span class="p">();</span>
+<span class="nx">pokemon</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">bulbasaur</span><span class="dl">'</span><span class="p">;</span>
+<span class="nx">pokemon</span><span class="p">.</span><span class="nx">type</span> <span class="o">=</span> <span class="p">[</span><span class="dl">'</span><span class="s1">grass</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">poison</span><span class="dl">'</span><span class="p">];</span>
+
+<span class="cm">/* This POST to api/pokemon, with all the properties of Pokemon as the body. */</span>
+<span class="nx">pokemon</span><span class="p">.</span><span class="nx">save</span><span class="p">().</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="cm">/* 
+    The pokemon instance will now have an ID.
+    Because every property from the back-end response
+    is merged into the pokemon instance automatically.
+    This MUTATES the pokemon instance!
+  */</span>
+
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">pokemon</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span> <span class="c1">// Prints "1";</span>
+
+  <span class="cm">/* This PUT to api/pokemon/1, with all the properties of Pokemon as the body. */</span>
+  <span class="nx">pokemon</span><span class="p">.</span><span class="nx">save</span><span class="p">();</span>
+
+  <span class="cm">/* This will DELETE to api/pokemon/1. */</span>
+  <span class="nx">pokemon</span><span class="p">.</span><span class="nx">remove</span><span class="p">().</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="cm">/* 
+      The pokemon instance will no longer have an id because
+      `remove` will delete the `id` MUTATING the pokemon.
+    */</span>
+
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">pokemon</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span> <span class="cm">/* Prints "undefined"; */</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<h2 id="42-uploading">4.2 Uploading</h2>
+
+<p>When uploading files it is important to know that <code class="highlighter-rouge">post</code>, <code class="highlighter-rouge">put</code> and
+<code class="highlighter-rouge">patch</code> support <code class="highlighter-rouge">FormData</code> as the payload argument.</p>
+
+<p>Often it is easiest when <code class="highlighter-rouge">uploading</code> to simply create a static
+method called <code class="highlighter-rouge">save</code> which can take a form to upload.</p>
+
+<p>Here is an example of a form, it contains sprites which are
+either Files or urls as a string:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="nx">type</span> <span class="nx">PokemonFormData</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="nx">id</span><span class="p">?:</span> <span class="nx">number</span><span class="p">;</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="nx">string</span><span class="p">;</span>
+
+  <span class="nl">spriteFront</span><span class="p">:</span> <span class="nx">string</span> <span class="o">|</span> <span class="nx">File</span><span class="p">;</span>
+  <span class="nl">spriteBack</span><span class="p">:</span> <span class="nx">string</span> <span class="o">|</span> <span class="nx">File</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Heres a <code class="highlighter-rouge">static</code> <code class="highlighter-rouge">save</code> method on the <code class="highlighter-rouge">Pokemon</code> resource that
+creates a <code class="highlighter-rouge">multipart/form-data;</code> request.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">makeResource</span><span class="p">,</span> <span class="nx">post</span><span class="p">,</span> <span class="nx">put</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@42.nl/spring-connect</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">baseUrl</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">/api/pokemon</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">class</span> <span class="nx">Pokemon</span> <span class="kd">extends</span> <span class="nx">makeResource</span><span class="o">&lt;</span><span class="nx">Pokemon</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">baseUrl</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">id</span><span class="o">!</span><span class="p">:</span> <span class="nx">number</span><span class="p">;</span>
+  <span class="nx">name</span><span class="o">!</span><span class="p">:</span> <span class="nx">string</span><span class="p">;</span>
+
+  <span class="nx">spriteFront</span><span class="o">!</span><span class="p">:</span> <span class="nx">string</span><span class="p">;</span>
+  <span class="nx">spriteBack</span><span class="o">!</span><span class="p">:</span> <span class="nx">string</span><span class="p">;</span>
+
+  <span class="cm">/* This save either POST's a new pokemon, or PUTS to an existing one. */</span>
+  <span class="kd">static</span> <span class="nx">save</span><span class="p">(</span><span class="nx">pokemonForm</span><span class="p">:</span> <span class="nx">PokemonFormData</span><span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Pokemon</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="cm">/* The formData will contain the pokemon and optionally the two sprites. */</span>
+    <span class="kd">const</span> <span class="nx">formData</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">FormData</span><span class="p">();</span>
+
+    <span class="cm">/* If there is a front sprite File add it to the formData. */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">pokemonForm</span><span class="p">.</span><span class="nx">spriteFront</span> <span class="k">instanceof</span> <span class="nx">File</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">formData</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="dl">'</span><span class="s1">front</span><span class="dl">'</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Blob</span><span class="p">([</span><span class="nx">pokemonForm</span><span class="p">.</span><span class="nx">spriteFront</span><span class="p">]));</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* If there is a back sprite File add it to the formData. */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">pokemonForm</span><span class="p">.</span><span class="nx">spriteBack</span> <span class="k">instanceof</span> <span class="nx">File</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">formData</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="dl">'</span><span class="s1">back</span><span class="dl">'</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Blob</span><span class="p">([</span><span class="nx">pokemonForm</span><span class="p">.</span><span class="nx">spriteBack</span><span class="p">]));</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* Now remove the sprites */</span>
+    <span class="k">delete</span> <span class="nx">pokemonForm</span><span class="p">.</span><span class="nx">spriteFront</span><span class="p">;</span>
+    <span class="k">delete</span> <span class="nx">pokemonForm</span><span class="p">.</span><span class="nx">spriteBack</span><span class="p">;</span>
+
+    <span class="cm">/* Append the pokemon blob. */</span>
+    <span class="kd">const</span> <span class="nx">pokemon</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Blob</span><span class="p">([</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">pokemonForm</span><span class="p">)],</span> <span class="p">{</span>
+      <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">application/json</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">});</span>
+    <span class="nx">formData</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="dl">'</span><span class="s1">pokemon</span><span class="dl">'</span><span class="p">,</span> <span class="nx">pokemon</span><span class="p">);</span>
+
+    <span class="cm">/* POST on create, PUT on edit. */</span>
+    <span class="kd">const</span> <span class="nx">method</span> <span class="o">=</span> <span class="nx">pokemonForm</span><span class="p">.</span><span class="nx">id</span> <span class="p">?</span> <span class="nx">put</span> <span class="p">:</span> <span class="nx">post</span><span class="p">;</span>
+
+    <span class="kd">const</span> <span class="nx">url</span> <span class="o">=</span> <span class="nx">pokemonForm</span><span class="p">.</span><span class="nx">id</span> <span class="p">?</span> <span class="s2">`</span><span class="p">${</span><span class="nx">baseUrl</span><span class="p">}</span><span class="s2">/</span><span class="p">${</span><span class="nx">pokemonForm</span><span class="p">.</span><span class="nx">id</span><span class="p">}</span><span class="s2">`</span> <span class="p">:</span> <span class="nx">baseUrl</span><span class="p">;</span>
+
+    <span class="cm">/* 
+      Finally send the `multipart/form-data;` which has three entries:
+      the front sprite, back sprite, and the pokemon data.
+    */</span>
+    <span class="k">return</span> <span class="nx">method</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">formData</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Now that we know how to mutate our data lets see how we can add custom
+methods to our Pokemon.</p>
+:ET

@@ -1,0 +1,99 @@
+I"v"<h2 id="explanation">Explanation</h2>
+
+<p>These utilities are the building blocks which are used throughout this library to create the methods for the Resource’s. You can use
+these functions to write your own Resource methods.</p>
+
+<h3 id="get">get</h3>
+
+<p>The <strong><em>get</em></strong> function does a <code class="highlighter-rouge">GET</code> request to the given url, with the query params if they are provided. It then passes along the result to the configured middleware for processing.</p>
+
+<p>For example:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="kd">get</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@42.nl/spring-connect</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">/api/pokemon</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">page</span><span class="p">:</span> <span class="mi">1</span> <span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="nx">json</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="c1">// Do something with the json here</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>Note: that the second parameter can be left empty if you have
+no query parameters.</p>
+
+<h3 id="post">post</h3>
+
+<p>The <strong><em>post</em></strong> function does a <code class="highlighter-rouge">POST</code> request to the given url, with the given payload.
+Then gives the result to the configured middleware
+for processing.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">post</span><span class="p">(</span><span class="dl">'</span><span class="s1">/api/pokemon</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">bulbasaur</span><span class="dl">'</span> <span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="nx">json</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="c1">// Do something with the json here</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>The <code class="highlighter-rouge">payload</code> can also be a <code class="highlighter-rouge">FormData</code> object, which is useful when uploading
+files: See <a href="https://developer.mozilla.org/en-US/docs/Web/API/FormData">MDN</a>.</p>
+
+<h3 id="put">put</h3>
+
+<p>The <strong><em>put</em></strong> function does a <code class="highlighter-rouge">PUT</code> request to the given url, with the given payload.
+It then gives the result to the configured middleware for processing.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">put</span><span class="p">(</span><span class="dl">'</span><span class="s1">/api/pokemon/1</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">bulbasaur</span><span class="dl">'</span> <span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="nx">json</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="c1">// Do something with the json here</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>The <code class="highlighter-rouge">payload</code> can also be a <code class="highlighter-rouge">FormData</code> object, useful for when uploading
+files: See <a href="https://developer.mozilla.org/en-US/docs/Web/API/FormData">MDN</a>.</p>
+
+<h3 id="patch">patch</h3>
+
+<p>The <strong><em>patch</em></strong> function does a <code class="highlighter-rouge">PATCH</code> request to the given url, with the given payload.
+Then gives the result to the configured middleware
+for processing.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">patch</span><span class="p">(</span><span class="dl">'</span><span class="s1">/api/pokemon/1</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">bulbasaur</span><span class="dl">'</span> <span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="nx">json</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="c1">// Do something with the json here</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>The <code class="highlighter-rouge">payload</code> can also be a <code class="highlighter-rouge">FormData</code> object, useful for when uploading
+files: See <a href="https://developer.mozilla.org/en-US/docs/Web/API/FormData">MDN</a>.</p>
+
+<h3 id="remove">remove</h3>
+
+<p>The <strong><em>remove</em></strong> function does a <code class="highlighter-rouge">DELETE</code> request to the given url.
+Then gives the result to the configured middleware
+for processing.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">remove</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@42.nl/spring-connect</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="nx">remove</span><span class="p">(</span><span class="dl">'</span><span class="s1">/api/pokemon/1</span><span class="dl">'</span><span class="p">).</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="c1">// Do something here.</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<h3 id="makeinstance">makeInstance</h3>
+
+<p>Takes a class definition and an object of JSON properties,
+creates an instance of the provided and sets the JSON properties
+as the properties of the class.</p>
+
+<p>For example:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">makeInstance</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@42.nl/spring-connect</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="nx">Person</span> <span class="p">{</span>
+  <span class="nl">id</span><span class="p">:</span> <span class="nx">number</span><span class="p">;</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="nx">string</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nx">test</span><span class="p">(</span><span class="dl">'</span><span class="s1">makeInstance</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">person</span> <span class="o">=</span> <span class="nx">makeInstance</span><span class="p">(</span><span class="nx">Person</span><span class="p">,</span> <span class="p">{</span> <span class="na">id</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Maarten Hus</span><span class="dl">'</span> <span class="p">});</span>
+
+  <span class="nx">expect</span><span class="p">(</span><span class="nx">person</span> <span class="k">instanceof</span> <span class="nx">Person</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+  <span class="nx">expect</span><span class="p">(</span><span class="nx">person</span><span class="p">.</span><span class="nx">id</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+  <span class="nx">expect</span><span class="p">(</span><span class="nx">person</span><span class="p">.</span><span class="nx">name</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="dl">'</span><span class="s1">Maarten Hus</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div></div>
+:ET

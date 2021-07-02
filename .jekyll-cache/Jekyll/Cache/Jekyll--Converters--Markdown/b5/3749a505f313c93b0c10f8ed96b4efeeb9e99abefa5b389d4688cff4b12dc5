@@ -1,0 +1,10 @@
+I"m<h3 id="with-npm">With npm</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install @42.nl/spring-connect --save
+</code></pre></div></div>
+
+<h3 id="or-with-yarn">Or with Yarn</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yarn add @42.nl/spring-connect
+</code></pre></div></div>
+:ET
