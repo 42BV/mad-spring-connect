@@ -181,7 +181,12 @@ export function makeResource<T, ID = number>(config: MakeResourceConfig<T>) {
     public static async findOne(queryParams: QueryParams): Promise<T | void> {
       const json = await get<T>(baseUrl, queryParams);
 
-      if (typeof json !== 'object' || json === null || Array.isArray(json) || Object.keys(json).length === 0) {
+      if (
+        typeof json !== 'object' ||
+        json === null ||
+        Array.isArray(json) ||
+        Object.keys(json).length === 0
+      ) {
         return undefined;
       }
 
@@ -254,6 +259,9 @@ function getMapper<T>(config: MakeResourceConfig<T>): Mapper<T> {
  * The default mapper uses `makeInstance` to convert the JSON
  * to a T.
  */
-function defaultMapper<T>(json: Record<string, unknown>, Class: { new (): T }): T {
+function defaultMapper<T>(
+  json: Record<string, unknown>,
+  Class: { new (): T }
+): T {
   return makeInstance(Class, json);
 }

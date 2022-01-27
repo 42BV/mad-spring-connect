@@ -1,6 +1,4 @@
-import fetchMock from 'fetch-mock';
-import { configureMadConnect } from '../src/config';
-import * as middleware from '../src/middleware';
+import mockAxios from 'jest-mock-axios';
 import { makeResource } from '../src/resource';
 import { makeInstance } from '../src/utils';
 
@@ -11,13 +9,17 @@ describe('Resource', () => {
     types: string[];
   };
 
+  class Trainer extends makeResource<Trainer>({ baseUrl: '/api/trainer' }) {
+    public id?: number;
+    public name!: string;
+  }
+
   class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
     public id?: number;
     public name!: string;
     public types!: string[];
   }
 
-  // @ts-expect-error Test mock
   class Pokeball extends makeResource<Pokeball>({
     baseUrl: '/api/pokeball',
     mapper: pokeballMapper
@@ -45,53 +47,23 @@ describe('Resource', () => {
     return pokeball;
   }
 
-  beforeEach(() => {
-    configureMadConnect({
-      fetch: undefined,
-      middleware: [middleware.checkStatus, middleware.parseJSON]
-    });
-  });
-
   afterEach(() => {
-    fetchMock.restore();
+    mockAxios.reset();
   });
 
   describe('save', () => {
     test('create', async () => {
-      expect.assertions(5);
-
-      const response = {
-        body: {
-          id: 1,
-          name: 'bulbasaur',
-          types: ['poison', 'grass']
-        },
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
-      };
-
-      fetchMock.post('/api/pokemon', response);
+      expect.assertions(6);
 
       const pokemon = new Pokemon();
 
       pokemon.name = 'bulbasaur';
       pokemon.types = ['poison', 'grass'];
 
-      await pokemon.save();
-
-      expect(pokemon instanceof Pokemon).toBe(true);
-      expect(pokemon.id).toBe(1);
-      expect(pokemon.name).toBe('bulbasaur');
-      expect(pokemon.types).toEqual(['poison', 'grass']);
-
-      const { body } = fetchMock.lastOptions() ?? { body: '' };
-      expect(body).toBe(`{"name":"bulbasaur","types":["poison","grass"]}`);
-    });
-
-    test('update', async () => {
-      expect.assertions(5);
+      const request = pokemon.save();
 
       const response = {
-        body: {
+        data: {
           id: 1,
           name: 'bulbasaur',
           types: ['poison', 'grass']
@@ -99,34 +71,51 @@ describe('Resource', () => {
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       };
 
-      fetchMock.put('/api/pokemon/1', response);
+      mockAxios.mockResponseFor('/api/pokemon', response);
+
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.post).toBeCalledTimes(1);
+
+      expect(pokemon instanceof Pokemon).toBe(true);
+      expect(pokemon.id).toBe(1);
+      expect(pokemon.name).toBe('bulbasaur');
+      expect(pokemon.types).toEqual(['poison', 'grass']);
+    });
+
+    test('update', async () => {
+      expect.assertions(6);
 
       const pokemon = new Pokemon();
       pokemon.id = 1;
       pokemon.name = 'bulbasaur';
       pokemon.types = ['poison', 'grass'];
 
-      await pokemon.save();
+      const request = pokemon.save();
+
+      const response = {
+        data: {
+          id: 1,
+          name: 'bulbasaur',
+          types: ['poison', 'grass']
+        },
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+      };
+
+      mockAxios.mockResponseFor('/api/pokemon/1', response);
+
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.put).toBeCalledTimes(1);
 
       expect(pokemon instanceof Pokemon).toBe(true);
       expect(pokemon.id).toBe(1);
       expect(pokemon.name).toBe('bulbasaur');
       expect(pokemon.types).toEqual(['poison', 'grass']);
-
-      const { body } = fetchMock.lastOptions() ?? { body: '' };
-      expect(body).toBe(
-        `{"id":1,"name":"bulbasaur","types":["poison","grass"]}`
-      );
     });
   });
 
   describe('remove', () => {
     test('has id', async () => {
-      expect.assertions(4);
-
-      fetchMock.delete('/api/pokemon/1', {
-        status: 204
-      });
+      expect.assertions(7);
 
       const pokemon = new Pokemon();
 
@@ -134,7 +123,16 @@ describe('Resource', () => {
       pokemon.name = 'bulbasaur';
       pokemon.types = ['poison', 'grass'];
 
-      await pokemon.remove();
+      const request = pokemon.remove();
+
+      mockAxios.mockResponseFor('/api/pokemon/1', {
+        status: 204,
+        data: ''
+      });
+
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.delete).toBeCalledTimes(1);
+      expect(mockAxios.delete).toBeCalledWith('/api/pokemon/1');
 
       expect(pokemon instanceof Pokemon).toBe(true);
       expect(pokemon.id).toBe(undefined);
@@ -143,7 +141,7 @@ describe('Resource', () => {
     });
 
     test('does not have id', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       const pokemon = new Pokemon();
       pokemon.name = 'bulbasaur';
@@ -151,20 +149,23 @@ describe('Resource', () => {
 
       try {
         await pokemon.remove();
-      } catch (error) {
+      } catch (error: any) {
         expect(error.message).toBe(
           'Cannot remove a Resource which has no id, this is a programmer error.'
         );
+        expect(mockAxios.delete).toBeCalledTimes(0);
       }
     });
   });
 
   describe('one', () => {
     test('without query params', async () => {
-      expect.assertions(4);
+      expect.assertions(7);
+
+      const request = Pokemon.one(1);
 
       const response = {
-        body: {
+        data: {
           id: 1,
           name: 'bulbasaur',
           types: ['poison', 'grass']
@@ -172,9 +173,13 @@ describe('Resource', () => {
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       };
 
-      fetchMock.get('/api/pokemon/1', response);
+      mockAxios.mockResponseFor('/api/pokemon/1', response);
 
-      const pokemon = await Pokemon.one(1);
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/pokemon/1');
+
+      const pokemon = await request;
 
       expect(pokemon instanceof Pokemon).toBe(true);
       expect(pokemon.id).toBe(1);
@@ -183,10 +188,12 @@ describe('Resource', () => {
     });
 
     test('with query params', async () => {
-      expect.assertions(4);
+      expect.assertions(7);
+
+      const request = Pokemon.one(1, { number: 42 });
 
       const response = {
-        body: {
+        data: {
           id: 1,
           name: 'bulbasaur',
           types: ['poison', 'grass']
@@ -194,9 +201,13 @@ describe('Resource', () => {
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       };
 
-      fetchMock.get('/api/pokemon/1?number=42', response);
+      mockAxios.mockResponseFor('/api/pokemon/1?number=42', response);
 
-      const pokemon = await Pokemon.one(1, { number: 42 });
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/pokemon/1?number=42');
+
+      const pokemon = await request;
 
       expect(pokemon instanceof Pokemon).toBe(true);
       expect(pokemon.id).toBe(1);
@@ -205,10 +216,12 @@ describe('Resource', () => {
     });
 
     test('with id which is a string', async () => {
-      expect.assertions(4);
+      expect.assertions(7);
+
+      const request = Pokemon.one('1');
 
       const response = {
-        body: {
+        data: {
           id: 1,
           name: 'bulbasaur',
           types: ['poison', 'grass']
@@ -216,9 +229,13 @@ describe('Resource', () => {
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       };
 
-      fetchMock.get('/api/pokemon/1', response);
+      mockAxios.mockResponseFor('/api/pokemon/1', response);
 
-      const pokemon = await Pokemon.one('1');
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/pokemon/1');
+
+      const pokemon = await request;
 
       expect(pokemon instanceof Pokemon).toBe(true);
       expect(pokemon.id).toBe(1);
@@ -227,22 +244,29 @@ describe('Resource', () => {
     });
 
     test('with custom mapper', async () => {
-      expect.assertions(7);
+      expect.assertions(10);
+
+      const request = Pokeball.one(1);
 
       const response = {
-        id: 1,
-        pokemon: {
+        data: {
           id: 1,
-          name: 'bulbasaur',
-          types: ['poison', 'grass']
+          pokemon: {
+            id: 1,
+            name: 'bulbasaur',
+            types: ['poison', 'grass']
+          }
         },
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       };
 
-      fetchMock.get('/api/pokeball/1', response);
+      mockAxios.mockResponseFor('/api/pokeball/1', response);
 
-      // @ts-expect-error Test mock
-      const pokeball = await Pokeball.one(1);
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/pokeball/1');
+
+      const pokeball = await request;
 
       expect(pokeball instanceof Pokeball).toBe(true);
       expect(pokeball.id).toBe(1);
@@ -255,53 +279,87 @@ describe('Resource', () => {
       expect(pokemon.name).toBe('bulbasaur');
       expect(pokemon.types).toEqual(['poison', 'grass']);
     });
+
+    test('with default mapper', async () => {
+      expect.assertions(6);
+
+      const request = Trainer.one(1);
+
+      const response = {
+        data: {
+          id: 1,
+          name: 'Ash'
+        },
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+      };
+
+      mockAxios.mockResponseFor('/api/trainer/1', response);
+
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/trainer/1');
+
+      const trainer = await request;
+
+      expect(trainer instanceof Trainer).toBe(true);
+      expect(trainer.id).toBe(1);
+      expect(trainer.name).toBe('Ash');
+    });
   });
 
   describe('findOne', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async function expectPokemonFindOneUndefined(response: {
-      body: any;
+      data: any;
       headers: { [key: string]: string };
     }) {
-      fetchMock.get('/api/pokemon?name=bulbasaur', response);
+      const request = Pokemon.findOne({ name: 'bulbasaur' });
 
-      const pokemon = await Pokemon.findOne({ name: 'bulbasaur' });
+      mockAxios.mockResponseFor('/api/pokemon?name=bulbasaur', response);
+
+      await expect(request).resolves.toBeUndefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/pokemon?name=bulbasaur');
+
+      const pokemon = await request;
 
       expect(pokemon).toBe(undefined);
     }
 
     test('when response is an empty object', async () => {
-      expect.assertions(1);
+      expect.assertions(4);
 
       await expectPokemonFindOneUndefined({
-        body: {},
+        data: {},
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       });
     });
 
     test('when response is an empty array', async () => {
-      expect.assertions(1);
+      expect.assertions(4);
 
       await expectPokemonFindOneUndefined({
-        body: [],
+        data: [],
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       });
     });
 
     test('when response is a filled array', async () => {
-      expect.assertions(1);
+      expect.assertions(4);
 
       await expectPokemonFindOneUndefined({
-        body: [1, 2, 3],
+        data: [1, 2, 3],
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       });
     });
 
     test('when resource exists', async () => {
-      expect.assertions(4);
+      expect.assertions(7);
+
+      const request = Pokemon.findOne({ name: 'bulbasaur' });
 
       const response = {
-        body: {
+        data: {
           id: 1,
           name: 'bulbasaur',
           types: ['poison', 'grass']
@@ -309,9 +367,13 @@ describe('Resource', () => {
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       };
 
-      fetchMock.get('/api/pokemon?name=bulbasaur', response);
+      mockAxios.mockResponseFor('/api/pokemon?name=bulbasaur', response);
 
-      const pokemon = await Pokemon.findOne({ name: 'bulbasaur' });
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/pokemon?name=bulbasaur');
+
+      const pokemon = await request;
 
       if (pokemon) {
         expect(pokemon instanceof Pokemon).toBe(true);
@@ -322,22 +384,29 @@ describe('Resource', () => {
     });
 
     test('with custom mapper', async () => {
-      expect.assertions(7);
+      expect.assertions(10);
+
+      const request = Pokeball.findOne({ name: 'bulbasaur' });
 
       const response = {
-        id: 1,
-        pokemon: {
+        data: {
           id: 1,
-          name: 'bulbasaur',
-          types: ['poison', 'grass']
+          pokemon: {
+            id: 1,
+            name: 'bulbasaur',
+            types: ['poison', 'grass']
+          }
         },
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       };
 
-      fetchMock.get('/api/pokeball?name=bulbasaur', response);
+      mockAxios.mockResponseFor('/api/pokeball?name=bulbasaur', response);
 
-      // @ts-expect-error Test mock
-      const pokeball = await Pokeball.findOne({ name: 'bulbasaur' });
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/pokeball?name=bulbasaur');
+
+      const pokeball = await request;
 
       if (pokeball) {
         const pokemon = pokeball.pokemon;
@@ -356,10 +425,12 @@ describe('Resource', () => {
 
   describe('list', () => {
     test('without query params', async () => {
-      expect.assertions(13);
+      expect.assertions(16);
+
+      const request = Pokemon.list();
 
       const response = {
-        body: [
+        data: [
           {
             id: 1,
             name: 'bulbasaur',
@@ -378,9 +449,13 @@ describe('Resource', () => {
         ],
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       };
-      fetchMock.get('/api/pokemon', response);
+      mockAxios.mockResponseFor('/api/pokemon', response);
 
-      const pokemonList = await Pokemon.list();
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/pokemon');
+
+      const pokemonList = await request;
 
       expect(pokemonList.length).toBe(3);
 
@@ -403,10 +478,12 @@ describe('Resource', () => {
     });
 
     test('with query params', async () => {
-      expect.assertions(13);
+      expect.assertions(16);
+
+      const request = Pokemon.list({ filter: true });
 
       const response = {
-        body: [
+        data: [
           {
             id: 1,
             name: 'bulbasaur',
@@ -425,9 +502,13 @@ describe('Resource', () => {
         ],
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       };
-      fetchMock.get('/api/pokemon?filter=true', response);
+      mockAxios.mockResponseFor('/api/pokemon?filter=true', response);
 
-      const pokemonList = await Pokemon.list({ filter: true });
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/pokemon?filter=true');
+
+      const pokemonList = await request;
 
       expect(pokemonList.length).toBe(3);
 
@@ -450,10 +531,12 @@ describe('Resource', () => {
     });
 
     test('with custom mapper', async () => {
-      expect.assertions(22);
+      expect.assertions(25);
+
+      const request = Pokeball.list();
 
       const response = {
-        body: [
+        data: [
           {
             id: 1,
             pokemon: {
@@ -482,10 +565,13 @@ describe('Resource', () => {
         ],
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       };
-      fetchMock.get('/api/pokeball', response);
+      mockAxios.mockResponseFor('/api/pokeball', response);
 
-      // @ts-expect-error Test mock
-      const pokeballList = await Pokeball.list();
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/pokeball');
+
+      const pokeballList = await request;
 
       expect(pokeballList.length).toBe(3);
 
@@ -528,7 +614,9 @@ describe('Resource', () => {
 
   describe('page', () => {
     test('without query params', async () => {
-      expect.assertions(13);
+      expect.assertions(16);
+
+      const request = Pokemon.page();
 
       const content = [
         {
@@ -549,7 +637,7 @@ describe('Resource', () => {
       ];
 
       const response = {
-        body: {
+        data: {
           last: true,
           totalElements: 3,
           totalPages: 1,
@@ -562,9 +650,13 @@ describe('Resource', () => {
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       };
 
-      fetchMock.get('/api/pokemon', response);
+      mockAxios.mockResponseFor('/api/pokemon', response);
 
-      const pokemonPage = await Pokemon.page();
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/pokemon');
+
+      const pokemonPage = await request;
 
       expect(pokemonPage.content.length).toBe(3);
 
@@ -587,7 +679,9 @@ describe('Resource', () => {
     });
 
     test('with query params', async () => {
-      expect.assertions(13);
+      expect.assertions(16);
+
+      const request = Pokemon.page({ page: 1 });
 
       const content = [
         {
@@ -608,7 +702,7 @@ describe('Resource', () => {
       ];
 
       const response = {
-        body: {
+        data: {
           last: true,
           totalElements: 3,
           totalPages: 1,
@@ -621,9 +715,13 @@ describe('Resource', () => {
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       };
 
-      fetchMock.get('/api/pokemon?page=1', response);
+      mockAxios.mockResponseFor('/api/pokemon?page=1', response);
 
-      const pokemonPage = await Pokemon.page({ page: 1 });
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/pokemon?page=1');
+
+      const pokemonPage = await request;
 
       expect(pokemonPage.content.length).toBe(3);
 
@@ -646,7 +744,9 @@ describe('Resource', () => {
     });
 
     test('with custom mapper', async () => {
-      expect.assertions(22);
+      expect.assertions(25);
+
+      const request = Pokeball.page({ page: 1 });
 
       const content = [
         {
@@ -677,7 +777,7 @@ describe('Resource', () => {
       ];
 
       const response = {
-        body: {
+        data: {
           last: true,
           totalElements: 3,
           totalPages: 1,
@@ -690,10 +790,13 @@ describe('Resource', () => {
         headers: { 'Content-Type': 'application/json;charset=UTF-8' }
       };
 
-      fetchMock.get('/api/pokeball?page=1', response);
+      mockAxios.mockResponseFor('/api/pokeball?page=1', response);
 
-      // @ts-expect-error Test mock
-      const pokeballPage = await Pokeball.page({ page: 1 });
+      await expect(request).resolves.toBeDefined();
+      expect(mockAxios.get).toBeCalledTimes(1);
+      expect(mockAxios.get).toBeCalledWith('/api/pokeball?page=1');
+
+      const pokeballPage = await request;
 
       expect(pokeballPage.content.length).toBe(3);
 
