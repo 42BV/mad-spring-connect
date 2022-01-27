@@ -27,6 +27,12 @@ import { QueryParams } from './types';
  * @param {JSON} properties The properties you want the instance which will be created to have.
  * @template T A class definition
  * @returns An instance of the Class with the properties set.
+ *
+ * @deprecated A resource provides basic functions that might not be defined in
+ * your API, and detail responses often provide more/other properties, which
+ * could cause type confusion or unnecessary checks for optional properties.
+ * We recommend using explicit functions for calls to your API that provide
+ * specific typing.
  */
 export function makeInstance<T>(
   Class: { new (): T },
