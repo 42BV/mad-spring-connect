@@ -67,6 +67,12 @@ export type MakeResourceConfig<T> =
  * @template ID The type for the id field of the resource defaults to number.
  * @param {string} baseUrl The baseUrl of the resource
  * @returns
+ *
+ * @deprecated A resource provides basic functions that might not be defined in
+ * your API, and detail responses often provide more/other properties, which
+ * could cause type confusion or unnecessary checks for optional properties.
+ * We recommend using explicit functions for calls to your API that provide
+ * specific typing.
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function makeResource<T, ID = number>(config: MakeResourceConfig<T>) {
