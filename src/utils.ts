@@ -1,10 +1,10 @@
 import merge from 'lodash.merge';
 import { stringify } from 'query-string';
 
-import { getMiddleware } from './config';
-import { QueryParams, RequestInfo, Middleware } from './types';
+import { QueryParams } from './types';
 
 /* eslint-disable @typescript-eslint/ban-types */
+
 // Allow for object type as parameter to makeInstance
 
 /**
@@ -28,7 +28,10 @@ import { QueryParams, RequestInfo, Middleware } from './types';
  * @template T A class definition
  * @returns An instance of the Class with the properties set.
  */
-export function makeInstance<T>(Class: { new (): T }, properties: Record<string, unknown>): T {
+export function makeInstance<T>(
+  Class: { new (): T },
+  properties: Record<string, unknown>
+): T {
   const instance = new Class();
   return merge(instance, properties);
 }
@@ -41,17 +44,4 @@ export function buildUrl(url: string, queryParams?: QueryParams): string {
   } else {
     return url;
   }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function applyMiddleware(promise: Promise<any>, requestInfo: RequestInfo): Promise<any> {
-  const middleware: Middleware[] = getMiddleware();
-
-  let nextPromise = promise;
-
-  middleware.forEach((fn) => {
-    nextPromise = fn(nextPromise, requestInfo);
-  });
-
-  return nextPromise;
 }

@@ -1,7 +1,5 @@
-import fetchMock from 'fetch-mock';
+import mockAxios from 'jest-mock-axios';
 
-import * as middleware from '../src/middleware';
-import { configureMadConnect } from '../src/config';
 import { get, makeInstance } from '../src';
 import { makeResource } from '../src/resource';
 
@@ -45,14 +43,8 @@ describe('Scenario: "custom methods"', () => {
   }
 
   beforeEach(() => {
-    configureMadConnect({
-      fetch: undefined,
-      middleware: [middleware.checkStatus, middleware.parseJSON]
-    });
-
-    const response = {
-      headers: { 'Content-Type': 'application/json;charset=UTF-8' },
-      body: [
+    mockAxios.get.mockResolvedValueOnce({
+      data: [
         {
           id: 1,
           name: 'bulbasaur',
@@ -69,12 +61,11 @@ describe('Scenario: "custom methods"', () => {
           types: ['grass', 'poison']
         }
       ]
-    };
-    fetchMock.get('/api/pokemon/1/evolutions', response);
+    });
   });
 
   afterEach(() => {
-    fetchMock.restore();
+    mockAxios.reset();
   });
 
   test('instance method', async () => {
@@ -277,15 +268,8 @@ describe('Scenario: "extend methods"', () => {
     public types!: string[];
   }
 
-  beforeEach(() => {
-    configureMadConnect({
-      fetch: undefined,
-      middleware: [middleware.checkStatus, middleware.parseJSON]
-    });
-  });
-
   afterEach(() => {
-    fetchMock.restore();
+    mockAxios.reset();
   });
 
   test('instance method', async () => {
@@ -301,23 +285,26 @@ describe('Scenario: "extend methods"', () => {
       });
     };
 
+    const pokemon = new Pokemon();
+    pokemon.id = 1;
+    pokemon.name = 'bulbasaur';
+    pokemon.types = ['poison', 'grass'];
+
+    const request = pokemon.save();
+
     const response = {
       headers: { 'Content-Type': 'application/json;charset=UTF-8' },
-      body: {
+      data: {
         id: 1,
         name: 'bulbasaur',
         types: ['poison', 'grass']
       }
     };
 
-    fetchMock.put('/api/pokemon/1', response);
+    mockAxios.mockResponseFor('/api/pokemon/1', response);
 
-    const pokemon = new Pokemon();
-    pokemon.id = 1;
-    pokemon.name = 'bulbasaur';
-    pokemon.types = ['poison', 'grass'];
+    await request;
 
-    await pokemon.save();
     expect(pokemon.id).toBe(1337);
   });
 
@@ -331,104 +318,16 @@ describe('Scenario: "extend methods"', () => {
       return pokemon;
     };
 
-    const response = {
-      headers: { 'Content-Type': 'application/json;charset=UTF-8' },
-      body: {
-        id: 1,
-        name: 'bulbasaur',
-        types: ['poison', 'grass']
-      }
-    };
-
-    fetchMock.get('/api/pokemon/1', response);
+    mockAxios.get.mockResolvedValueOnce({
+      id: 1,
+      name: 'bulbasaur',
+      types: ['poison', 'grass']
+    });
 
     const p = await Pokemon.one(1);
+
     expect(p.id).toBe(42);
   });
-});
-
-// Test that we can override middleware
-test('Scenario: "custom success middleware"', async () => {
-  expect.assertions(2);
-
-  let finished = false;
-
-  class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
-    public id?: number;
-    public name!: string;
-    public types!: string[];
-  }
-
-  function customMiddleware(promise: Promise<unknown>): Promise<unknown> {
-    return promise
-      .then((response) => {
-        // @ts-expect-error Test mock
-        return response.json();
-      })
-      .then((envelope) => {
-        if (envelope.statusCode === 200) {
-          finished = true;
-          return envelope.data;
-        } else {
-          return envelope.error;
-        }
-      });
-  }
-
-  configureMadConnect({
-    fetch: undefined,
-    middleware: [customMiddleware]
-  });
-
-  const response = {
-    statusCode: 200,
-    data: { id: 1 },
-    error: {}
-  };
-  fetchMock.get('/api/pokemon/1', response);
-
-  const pokemon = await Pokemon.one(1);
-  expect(pokemon).toEqual({ id: 1 });
-
-  fetchMock.restore();
-
-  expect(finished).toBe(true);
-});
-
-// Test that we can override middleware
-test('Scenario: "custom error middleware"', async () => {
-  expect.assertions(2);
-
-  class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
-    public id?: number;
-    public name!: string;
-    public types!: string[];
-  }
-
-  const showError = jest.fn();
-
-  function customMiddleware(promise: Promise<unknown>): Promise<unknown> {
-    return promise.catch((error) => {
-      showError(error.message);
-      return Promise.reject(error);
-    });
-  }
-
-  configureMadConnect({
-    fetch: undefined,
-    middleware: [middleware.checkStatus, middleware.parseJSON, customMiddleware]
-  });
-
-  fetchMock.get('/api/pokemon/1', { status: 400 });
-
-  try {
-    await Pokemon.one(1);
-  } catch (error) {
-    expect(showError).toHaveBeenCalledTimes(1);
-    expect(showError).toHaveBeenCalledWith('Bad Request');
-
-    fetchMock.restore();
-  }
 });
 
 test('Scenario: check that the ID can be any type', async () => {
@@ -440,17 +339,6 @@ test('Scenario: check that the ID can be any type', async () => {
     public types!: string[];
   }
 
-  const response = {
-    headers: { 'Content-Type': 'application/json;charset=UTF-8' },
-    body: {
-      id: 'a-unique-uu-id-for-example',
-      name: 'bulbasaur',
-      types: ['poison', 'grass']
-    }
-  };
-
-  fetchMock.put('/api/pokemon/a-unique-uu-id-for-example', response);
-
   const pokemon = new Pokemon();
 
   // This should now work because the type of ID is now a string.
@@ -458,6 +346,23 @@ test('Scenario: check that the ID can be any type', async () => {
   pokemon.name = 'bulbasaur';
   pokemon.types = ['poison', 'grass'];
 
-  await pokemon.save();
+  const request = pokemon.save();
+
+  const response = {
+    headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+    data: {
+      id: 'a-unique-uu-id-for-example',
+      name: 'bulbasaur',
+      types: ['poison', 'grass']
+    }
+  };
+
+  mockAxios.mockResponseFor(
+    '/api/pokemon/a-unique-uu-id-for-example',
+    response
+  );
+
+  await request;
+
   expect(pokemon.id).toBe('a-unique-uu-id-for-example');
 });

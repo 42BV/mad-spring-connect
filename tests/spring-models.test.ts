@@ -1,4 +1,4 @@
-import { Page, emptyPage } from '../src/spring-models';
+import { emptyPage, Page } from '../src/spring-models';
 import { makeResource } from '../src/resource';
 
 class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
