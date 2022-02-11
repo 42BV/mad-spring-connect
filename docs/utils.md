@@ -85,28 +85,3 @@ remove('/api/pokemon/1').then(() => {
   // Do something here.
 });
 ```
-
-### makeInstance
-
-Takes a class definition and an object of JSON properties,
-creates an instance of the provided and sets the JSON properties
-as the properties of the class.
-
-For example:
-
-```ts
-import { makeInstance } from '@42.nl/spring-connect';
-
-class Person {
-  id: number;
-  name: string;
-}
-
-test('makeInstance', () => {
-  const person = makeInstance(Person, { id: 10, name: 'Maarten Hus' });
-
-  expect(person instanceof Person).toBe(true);
-  expect(person.id).toBe(10);
-  expect(person.name).toBe('Maarten Hus');
-});
-```
