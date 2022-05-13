@@ -1,6 +1,6 @@
 import { buildUrl } from './utils';
 import { Payload, QueryParams } from './types';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 /**
  * Does a GET request to the given url, with the query params if
@@ -44,8 +44,10 @@ export async function get<T>(
  * @param {Payload} payload The payload you want to send to the server.
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
-export function post<T>(url: string, payload: Payload<T>): Promise<T> {
-  return axios.post<T>(url, payload).then((res) => res.data);
+export function post<T, D = Payload<T>>(url: string, payload: D): Promise<T> {
+  return axios
+    .post<T, AxiosResponse<T>, D>(url, payload)
+    .then((res) => res.data);
 }
 
 /**
@@ -65,8 +67,10 @@ export function post<T>(url: string, payload: Payload<T>): Promise<T> {
  * @param {Payload} payload The payload you want to send to the server.
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
-export function put<T>(url: string, payload: Payload<T>): Promise<T> {
-  return axios.put<T>(url, payload).then((res) => res.data);
+export function put<T, D = Payload<T>>(url: string, payload: D): Promise<T> {
+  return axios
+    .put<T, AxiosResponse<T>, D>(url, payload)
+    .then((res) => res.data);
 }
 
 /**
@@ -86,8 +90,10 @@ export function put<T>(url: string, payload: Payload<T>): Promise<T> {
  * @param {Payload} payload The payload you want to send to the server.
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
-export function patch<T>(url: string, payload: Payload<T>): Promise<T> {
-  return axios.patch<T>(url, payload).then((res) => res.data);
+export function patch<T, D = Payload<T>>(url: string, payload: D): Promise<T> {
+  return axios
+    .patch<T, AxiosResponse<T>, D>(url, payload)
+    .then((res) => res.data);
 }
 
 /**
