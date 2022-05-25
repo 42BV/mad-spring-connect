@@ -5,8 +5,10 @@ describe('index', () => {
     expect(index).toMatchInlineSnapshot(`
       Object {
         "buildUrl": [Function],
+        "configureApi": [Function],
         "emptyPage": [Function],
         "get": [Function],
+        "getApi": [Function],
         "makeInstance": [Function],
         "makeResource": [Function],
         "patch": [Function],

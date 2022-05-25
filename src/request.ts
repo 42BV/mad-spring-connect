@@ -1,6 +1,7 @@
 import { buildUrl } from './utils';
 import { Payload, QueryParams } from './types';
-import axios, { AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
+import { getApi } from './config';
 
 /**
  * Does a GET request to the given url, with the query params if
@@ -24,7 +25,9 @@ export async function get<T>(
 ): Promise<T> {
   const finalUrl = buildUrl(url, queryParams);
 
-  return axios.get<T>(finalUrl).then((res) => res.data);
+  return getApi()
+    .get<T>(finalUrl)
+    .then((res) => res.data);
 }
 
 /**
@@ -45,7 +48,7 @@ export async function get<T>(
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
 export function post<T, D = Payload<T>>(url: string, payload: D): Promise<T> {
-  return axios
+  return getApi()
     .post<T, AxiosResponse<T>, D>(url, payload)
     .then((res) => res.data);
 }
@@ -68,7 +71,7 @@ export function post<T, D = Payload<T>>(url: string, payload: D): Promise<T> {
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
 export function put<T, D = Payload<T>>(url: string, payload: D): Promise<T> {
-  return axios
+  return getApi()
     .put<T, AxiosResponse<T>, D>(url, payload)
     .then((res) => res.data);
 }
@@ -91,7 +94,7 @@ export function put<T, D = Payload<T>>(url: string, payload: D): Promise<T> {
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
 export function patch<T, D = Payload<T>>(url: string, payload: D): Promise<T> {
-  return axios
+  return getApi()
     .patch<T, AxiosResponse<T>, D>(url, payload)
     .then((res) => res.data);
 }
@@ -116,5 +119,7 @@ export function patch<T, D = Payload<T>>(url: string, payload: D): Promise<T> {
  * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
  */
 export function remove<T>(url: string): Promise<T> {
-  return axios.delete<T>(url).then((res) => res.data);
+  return getApi()
+    .delete<T>(url)
+    .then((res) => res.data);
 }
