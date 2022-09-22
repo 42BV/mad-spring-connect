@@ -1,6 +1,6 @@
 import mockAxios from 'jest-mock-axios';
 
-import { get, patch, post, put, remove } from '../src/request';
+import { downloadFile, get, patch, post, put, remove } from '../src/request';
 
 // Note that we tests all the requests with the default middleware
 describe('requests', () => {
@@ -282,6 +282,84 @@ describe('requests', () => {
 
       await expect(request).rejects.toBe('Internal Server Error');
       expect(mockAxios.delete).toHaveBeenCalledWith('/api/pokemon/1');
+    });
+  });
+
+  describe('downloadFile', () => {
+    const createObjectURLSpy = jest.fn(() => 'object');
+    const revokeObjectURLSpy = jest.fn();
+    global.URL.createObjectURL = createObjectURLSpy;
+    global.URL.revokeObjectURL = revokeObjectURLSpy;
+    const clickSpy = jest.fn();
+    const setAttributeSpy = jest.fn();
+    const removeSpy = jest.fn();
+    const createElementSpy = jest
+      .spyOn(document, 'createElement')
+      // @ts-expect-error Test mock
+      .mockReturnValue({
+        click: clickSpy,
+        setAttribute: setAttributeSpy,
+        remove: removeSpy
+      });
+
+    afterEach(() => {
+      createElementSpy.mockReset();
+      createObjectURLSpy.mockReset();
+      revokeObjectURLSpy.mockReset();
+      clickSpy.mockReset();
+      setAttributeSpy.mockReset();
+      removeSpy.mockReset();
+    });
+
+    afterAll(() => {
+      createElementSpy.mockRestore();
+      createObjectURLSpy.mockRestore();
+      revokeObjectURLSpy.mockRestore();
+    });
+
+    test('with content-disposition', async () => {
+      expect.assertions(11);
+      const request = downloadFile('test');
+
+      mockAxios.mockResponseFor('test', {
+        data: 'testFile',
+        headers: {
+          'Content-Type': 'json',
+          'content-disposition': 'filename=test.test'
+        }
+      });
+
+      await expect(request).resolves.toBeUndefined();
+
+      expect(document.createElement).toHaveBeenCalledTimes(1);
+      expect(document.createElement).toHaveBeenCalledWith('a');
+      expect(createObjectURLSpy).toHaveBeenCalledTimes(1);
+      expect(createObjectURLSpy).toHaveBeenCalledWith('testFile');
+      expect(setAttributeSpy).toHaveBeenCalledTimes(1);
+      expect(setAttributeSpy).toHaveBeenCalledWith('download', 'test.test');
+      expect(clickSpy).toHaveBeenCalledTimes(1);
+      expect(removeSpy).toHaveBeenCalledTimes(1);
+      expect(revokeObjectURLSpy).toHaveBeenCalledTimes(1);
+      expect(revokeObjectURLSpy).toHaveBeenCalledWith('object');
+    });
+
+    test('without content-disposition', async () => {
+      expect.assertions(7);
+      const request = downloadFile('test');
+
+      mockAxios.mockResponseFor('test', {
+        data: 'error',
+        headers: { 'Content-Type': 'json' }
+      });
+
+      await expect(request).resolves.toBeUndefined();
+
+      expect(document.createElement).toHaveBeenCalledTimes(0);
+      expect(createObjectURLSpy).toHaveBeenCalledTimes(0);
+      expect(setAttributeSpy).toHaveBeenCalledTimes(0);
+      expect(clickSpy).toHaveBeenCalledTimes(0);
+      expect(removeSpy).toHaveBeenCalledTimes(0);
+      expect(revokeObjectURLSpy).toHaveBeenCalledTimes(0);
     });
   });
 });

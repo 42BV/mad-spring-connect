@@ -123,3 +123,25 @@ export function remove<T>(url: string): Promise<T> {
     .delete<T>(url)
     .then((res) => res.data);
 }
+
+export async function downloadFile(url: string): Promise<void> {
+  const response = await getApi().get(url, {
+    responseType: 'blob'
+  });
+
+  const content = response.headers['content-disposition'];
+  if (!content) {
+    return;
+  }
+
+  const filename = content.split('filename=')[1].replace(/['"]+/g, '');
+  const link = document.createElement('a');
+  const href = URL.createObjectURL(response.data);
+
+  link.href = href;
+  link.setAttribute('download', filename);
+  link.click();
+
+  link.remove();
+  URL.revokeObjectURL(href);
+}
