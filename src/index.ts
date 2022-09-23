@@ -1,4 +1,4 @@
-export { get, post, put, patch, remove } from './request';
+export { get, post, put, patch, remove, downloadFile } from './request';
 export { default as Config, configureApi, getApi } from './config';
 export { makeResource, MakeResourceConfig, Mapper } from './resource';
 export { Page, emptyPage } from './spring-models';

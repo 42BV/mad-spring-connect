@@ -124,8 +124,27 @@ export function remove<T>(url: string): Promise<T> {
     .then((res) => res.data);
 }
 
-export async function downloadFile(url: string): Promise<void> {
-  const response = await getApi().get(url, {
+/**
+ * Does a GET request to the given url, with the query params if
+ * they are provided. Then causes the result file to be sent to
+ * the browser as download.
+ *
+ * @example
+ * ```js
+ *  downloadFile('/api/pokemon/pdf', { sort: 'id,asc' });
+ * ```
+ * @export
+ * @param {string} url The url you want to send a GET request to.
+ * @param {QueryParams} queryParams Optional query params as an object.
+ * @returns {Promise} Returns a Promise, the content of the promise depends on the configured middleware.
+ */
+export async function downloadFile(
+  url: string,
+  queryParams?: QueryParams
+): Promise<void> {
+  const finalUrl = buildUrl(url, queryParams);
+
+  const response = await getApi().get(finalUrl, {
     responseType: 'blob'
   });
 
