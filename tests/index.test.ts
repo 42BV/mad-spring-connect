@@ -6,6 +6,7 @@ describe('index', () => {
       Object {
         "buildUrl": [Function],
         "configureApi": [Function],
+        "downloadFile": [Function],
         "emptyPage": [Function],
         "get": [Function],
         "getApi": [Function],

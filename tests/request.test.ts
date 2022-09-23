@@ -286,21 +286,24 @@ describe('requests', () => {
   });
 
   describe('downloadFile', () => {
-    const createObjectURLSpy = jest.fn(() => 'object');
+    const createObjectURLSpy = jest.fn();
     const revokeObjectURLSpy = jest.fn();
     global.URL.createObjectURL = createObjectURLSpy;
     global.URL.revokeObjectURL = revokeObjectURLSpy;
     const clickSpy = jest.fn();
     const setAttributeSpy = jest.fn();
     const removeSpy = jest.fn();
-    const createElementSpy = jest
-      .spyOn(document, 'createElement')
+    const createElementSpy = jest.spyOn(document, 'createElement');
+
+    beforeEach(() => {
+      createObjectURLSpy.mockReturnValue('object');
       // @ts-expect-error Test mock
-      .mockReturnValue({
+      createElementSpy.mockReturnValue({
         click: clickSpy,
         setAttribute: setAttributeSpy,
         remove: removeSpy
       });
+    });
 
     afterEach(() => {
       createElementSpy.mockReset();
@@ -318,7 +321,7 @@ describe('requests', () => {
     });
 
     test('with content-disposition', async () => {
-      expect.assertions(11);
+      expect.assertions(13);
       const request = downloadFile('test');
 
       mockAxios.mockResponseFor('test', {
@@ -330,6 +333,40 @@ describe('requests', () => {
       });
 
       await expect(request).resolves.toBeUndefined();
+      expect(mockAxios.get).toHaveBeenCalledTimes(1);
+      expect(mockAxios.get).toHaveBeenCalledWith('test', {
+        responseType: 'blob'
+      });
+
+      expect(document.createElement).toHaveBeenCalledTimes(1);
+      expect(document.createElement).toHaveBeenCalledWith('a');
+      expect(createObjectURLSpy).toHaveBeenCalledTimes(1);
+      expect(createObjectURLSpy).toHaveBeenCalledWith('testFile');
+      expect(setAttributeSpy).toHaveBeenCalledTimes(1);
+      expect(setAttributeSpy).toHaveBeenCalledWith('download', 'test.test');
+      expect(clickSpy).toHaveBeenCalledTimes(1);
+      expect(removeSpy).toHaveBeenCalledTimes(1);
+      expect(revokeObjectURLSpy).toHaveBeenCalledTimes(1);
+      expect(revokeObjectURLSpy).toHaveBeenCalledWith('object');
+    });
+
+    test('with content-disposition and queryParams', async () => {
+      expect.assertions(13);
+      const request = downloadFile('test', { sort: 'id,asc' });
+
+      mockAxios.mockResponseFor('test?sort=id%2Casc', {
+        data: 'testFile',
+        headers: {
+          'Content-Type': 'json',
+          'content-disposition': 'filename=test.test'
+        }
+      });
+
+      await expect(request).resolves.toBeUndefined();
+      expect(mockAxios.get).toHaveBeenCalledTimes(1);
+      expect(mockAxios.get).toHaveBeenCalledWith('test?sort=id%2Casc', {
+        responseType: 'blob'
+      });
 
       expect(document.createElement).toHaveBeenCalledTimes(1);
       expect(document.createElement).toHaveBeenCalledWith('a');
@@ -344,7 +381,7 @@ describe('requests', () => {
     });
 
     test('without content-disposition', async () => {
-      expect.assertions(7);
+      expect.assertions(9);
       const request = downloadFile('test');
 
       mockAxios.mockResponseFor('test', {
@@ -353,6 +390,10 @@ describe('requests', () => {
       });
 
       await expect(request).resolves.toBeUndefined();
+      expect(mockAxios.get).toHaveBeenCalledTimes(1);
+      expect(mockAxios.get).toHaveBeenCalledWith('test', {
+        responseType: 'blob'
+      });
 
       expect(document.createElement).toHaveBeenCalledTimes(0);
       expect(createObjectURLSpy).toHaveBeenCalledTimes(0);
