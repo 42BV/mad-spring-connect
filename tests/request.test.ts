@@ -2,7 +2,7 @@ import mockAxios from 'jest-mock-axios';
 
 import { downloadFile, get, patch, post, put, remove } from '../src/request';
 
-// Note that we tests all the requests with the default middleware
+// Note that we test all the requests with the default middleware
 describe('requests', () => {
   afterEach(() => {
     mockAxios.reset();
