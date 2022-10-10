@@ -3,7 +3,7 @@ import * as index from '../src';
 describe('index', () => {
   test('exports', () => {
     expect(index).toMatchInlineSnapshot(`
-      Object {
+      {
         "buildUrl": [Function],
         "configureApi": [Function],
         "downloadFile": [Function],
