@@ -57,7 +57,7 @@
     "lint": "npm run lint:test && npm run lint:src",
     "lint:test": "eslint \"tests/**\" --max-warnings=0",
     "lint:src": "eslint \"src/**\" --max-warnings=0",
-    "release": "npm run tsc && np --otp",
+    "release": "npm run tsc && np",
     "dev:publish": "./scripts/dev-publish.sh",
     "version": "npm run tsc && jekyll build",
     "prepare": "husky install"
