@@ -1,11 +1,9 @@
 import axios, { AxiosInstance } from 'axios';
 
-type Config = {
+export type Config = {
   // The fetch variant which is used to make requests.
   api?: AxiosInstance;
 };
-
-export default Config;
 
 const config: Config = {
   api: undefined // by default use axios as is

@@ -1,5 +1,5 @@
 import merge from 'lodash.merge';
-import { stringify } from 'query-string';
+import { default as queryString } from 'query-string';
 
 import { QueryParams } from './types';
 
@@ -45,7 +45,7 @@ export function makeInstance<T>(
 // Helpers
 export function buildUrl(url: string, queryParams?: QueryParams): string {
   if (queryParams) {
-    const params = stringify(queryParams);
+    const params = queryString.stringify(queryParams);
     return `${url}?${params}`;
   } else {
     return url;
