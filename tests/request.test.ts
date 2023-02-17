@@ -1,20 +1,16 @@
-import mockAxios from 'jest-mock-axios';
-
-import { downloadFile, get, patch, post, put, remove } from '../src/request';
+import { downloadFile, get, patch, post, put, remove } from '../src/request.js';
+import axios from 'axios';
+jest.mock('axios');
 
 // Note that we test all the requests with the default middleware
 describe('requests', () => {
-  afterEach(() => {
-    mockAxios.reset();
-  });
-
   describe('get', () => {
     test('200: without query parameters', async () => {
       expect.assertions(3);
 
       const request = get('/api/pokemon/1');
 
-      mockAxios.mockResponseFor('/api/pokemon/1', { data: { id: 1 } });
+      axios.mockResolvedValueponseFor('/api/pokemon/1', { data: { id: 1 } });
 
       await expect(request).resolves.toEqual({ id: 1 });
       expect(mockAxios.get).toHaveBeenCalledTimes(1);

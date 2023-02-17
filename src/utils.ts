@@ -1,7 +1,7 @@
 import merge from 'lodash.merge';
 import { default as queryString } from 'query-string';
 
-import { QueryParams } from './types';
+import { QueryParams } from './types.js';
 
 /* eslint-disable @typescript-eslint/ban-types */
 

@@ -1,4 +1,4 @@
-import { makeInstance } from '../src/utils';
+import { makeInstance } from '../src/utils.js';
 
 class Person {
   public id?: number;

@@ -1,9 +1,9 @@
 import merge from 'lodash.merge';
-import { get, post, put, remove as requestRemove } from './request';
+import { get, post, put, remove as requestRemove } from './request.js';
 
-import { Page } from './spring-models';
-import { QueryParams } from './types';
-import { makeInstance } from './utils';
+import { Page } from './spring-models.js';
+import { QueryParams } from './types.js';
+import { makeInstance } from './utils.js';
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 // Allow for makeResource not to have a return type

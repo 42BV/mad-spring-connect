@@ -29,3 +29,25 @@ export function emptyPage<T>(): Page<T> {
     numberOfElements: 0
   });
 }
+
+/**
+ * Create a Page of a subset of an array of items.
+ */
+export function pageOf<T>(content: T[], page = 1, size = 10): Page<T> {
+  const offset = (page - 1) * size;
+
+  const slice = content.slice(offset, offset + size);
+
+  const totalPages = Math.max(1, Math.ceil(content.length / size));
+
+  return Object.freeze({
+    content: slice,
+    last: page === totalPages,
+    totalElements: content.length,
+    totalPages,
+    size: slice.length,
+    number: page,
+    first: page === 1,
+    numberOfElements: slice.length
+  });
+}

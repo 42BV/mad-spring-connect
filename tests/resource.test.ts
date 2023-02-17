@@ -1,6 +1,6 @@
 import mockAxios from 'jest-mock-axios';
-import { makeResource } from '../src/resource';
-import { makeInstance } from '../src/utils';
+import { makeResource } from '../src/resource.js';
+import { makeInstance } from '../src/utils.js';
 
 describe('Resource', () => {
   type PokemonResult = {

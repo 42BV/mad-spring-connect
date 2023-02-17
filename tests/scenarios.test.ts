@@ -1,7 +1,8 @@
 import mockAxios from 'jest-mock-axios';
 
-import { get, makeInstance } from '../src';
-import { makeResource } from '../src/resource';
+import { get } from '../src/request.js';
+import { makeInstance } from '../src/utils.js';
+import { makeResource } from '../src/resource.js';
 
 // This file contains tests for common scenarios that the user
 // might want to use and which we want to document.

@@ -1,4 +1,4 @@
-import * as index from '../src';
+import * as index from '../src/index.js';
 
 describe('index', () => {
   test('exports', () => {
@@ -12,6 +12,7 @@ describe('index', () => {
         "getApi": [Function],
         "makeInstance": [Function],
         "makeResource": [Function],
+        "pageOf": [Function],
         "patch": [Function],
         "post": [Function],
         "put": [Function],

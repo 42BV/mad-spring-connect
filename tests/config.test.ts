@@ -1,4 +1,4 @@
-import { configureApi, getConfig, getApi } from '../src/config';
+import { configureApi, getConfig, getApi } from '../src/config.js';
 import axios, { AxiosInstance } from 'axios';
 
 let windowSpy: jest.SpyInstance;
