@@ -23,6 +23,8 @@ export declare class Resource<T> {
 }
 ```
 
+To be able to use resources, we have to `npm install lodash.merge` first.
+
 Lets say we want to define a Pokemon resource, we would go about it in the following way:
 
 ```ts
