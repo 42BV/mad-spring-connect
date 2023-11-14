@@ -12,6 +12,7 @@ describe('index', () => {
         "getApi": [Function],
         "makeInstance": [Function],
         "makeResource": [Function],
+        "mapPage": [Function],
         "pageOf": [Function],
         "patch": [Function],
         "post": [Function],
