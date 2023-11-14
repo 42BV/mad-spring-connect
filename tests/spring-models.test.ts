@@ -104,6 +104,7 @@ describe('mapPage', () => {
 
     const mappedPage = mapPage(mapper)(page);
 
+    expect(mapper).toHaveBeenCalledTimes(2);
     expect(mappedPage.content[0].created).toEqual(
       new Date('2023-01-01 00:00:00')
     );

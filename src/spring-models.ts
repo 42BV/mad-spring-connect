@@ -17,7 +17,7 @@ export type Page<T> = {
  * Represents an empty Page useful for initializing variables while
  * waiting for the actual Page to be retrieved.
  */
-export function emptyPage<T>(): Page<T> {
+export function emptyPage<T>(): Readonly<Page<T>> {
   return Object.freeze({
     content: [],
     last: true,
@@ -38,7 +38,7 @@ export function pageOf<T>(
   page = 1,
   size = 10,
   oneBased = true
-): Page<T> {
+): Readonly<Page<T>> {
   const actualPage = oneBased ? page - 1 : page;
 
   const offset = actualPage * size;
@@ -64,7 +64,9 @@ export function pageOf<T>(
  *
  * @param mapper Function to map the items to a specific type
  */
-export function mapPage<T, R = T>(mapper: (item: T) => R) {
+export function mapPage<T, R = T>(
+  mapper: (item: T) => R
+): (page: Page<T>) => Readonly<Page<R>> {
   return (page: Page<T>) =>
     Object.freeze({
       ...page,
