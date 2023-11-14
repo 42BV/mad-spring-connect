@@ -58,3 +58,16 @@ export function pageOf<T>(
     numberOfElements: slice.length
   });
 }
+
+/**
+ * Map a page returned from the back-end to a page of a specific type.
+ *
+ * @param mapper Function to map the items to a specific type
+ */
+export function mapPage<T, R = T>(mapper: (item: T) => R) {
+  return (page: Page<T>) =>
+    Object.freeze({
+      ...page,
+      content: page.content.map(mapper)
+    });
+}
