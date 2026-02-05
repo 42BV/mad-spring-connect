@@ -1,17 +1,8 @@
+import { expect, test } from 'vitest';
 import { configureApi, getConfig, getApi } from '../src/config';
 import axios, { AxiosInstance } from 'axios';
 
-let windowSpy: jest.SpyInstance;
-
-beforeEach(() => {
-  windowSpy = jest.spyOn(window, 'window', 'get');
-});
-
-afterEach(() => {
-  windowSpy.mockRestore();
-});
-
-test('configuration lifecycle', async () => {
+test('configuration lifecycle', () => {
   expect.assertions(4);
 
   // By default it should use regular axios.

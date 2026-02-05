@@ -144,11 +144,11 @@ export async function downloadFile(
 ): Promise<void> {
   const finalUrl = buildUrl(url, queryParams);
 
-  const response = await getApi().get(finalUrl, {
+  const response = await getApi().get<Blob>(finalUrl, {
     responseType: 'blob'
   });
 
-  const content = response.headers['content-disposition'];
+  const content: string | undefined = response.headers['content-disposition'];
   if (!content) {
     return;
   }

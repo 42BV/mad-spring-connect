@@ -1,4 +1,20 @@
-import mockAxios from 'jest-mock-axios';
+import {
+  expect,
+  test,
+  describe,
+  afterEach,
+  beforeEach,
+  afterAll,
+  vi
+} from 'vitest';
+import mockAxios from 'vitest-mock-axios';
+
+vi.mock('axios', () => {
+  return {
+    default: mockAxios,
+    __esModule: true
+  };
+});
 
 import { downloadFile, get, patch, post, put, remove } from '../src/request';
 
@@ -286,14 +302,14 @@ describe('requests', () => {
   });
 
   describe('downloadFile', () => {
-    const createObjectURLSpy = jest.fn();
-    const revokeObjectURLSpy = jest.fn();
+    const createObjectURLSpy = vi.fn();
+    const revokeObjectURLSpy = vi.fn();
     global.URL.createObjectURL = createObjectURLSpy;
     global.URL.revokeObjectURL = revokeObjectURLSpy;
-    const clickSpy = jest.fn();
-    const setAttributeSpy = jest.fn();
-    const removeSpy = jest.fn();
-    const createElementSpy = jest.spyOn(document, 'createElement');
+    const clickSpy = vi.fn();
+    const setAttributeSpy = vi.fn();
+    const removeSpy = vi.fn();
+    const createElementSpy = vi.spyOn(document, 'createElement');
 
     beforeEach(() => {
       createObjectURLSpy.mockReturnValue('object');

@@ -1,18 +1,15 @@
 {
   "compilerOptions": {
-    "noUnusedLocals": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
     "declaration": true,
-    "downlevelIteration": true,
-    "lib": ["dom", "es6", "es2015.promise"],
-    "module": "commonjs",
-    "moduleResolution": "Node",
-    "outDir": "./lib",
-    "strict": true,
+    "outDir": "lib",
+    "esModuleInterop": true,
     "target": "es6",
-    "esModuleInterop": true
+    "sourceMap": true,
+    "lib": ["es6", "dom"],
+    "strictNullChecks": true
   },
-  "files": ["src/index.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "_site", "tests/*"],
+  "include": ["src/*"]
 }

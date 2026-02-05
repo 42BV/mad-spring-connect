@@ -1,3 +1,4 @@
+import { expect, describe, test } from 'vitest';
 import * as index from '../src';
 
 describe('index', () => {
@@ -10,8 +11,6 @@ describe('index', () => {
         "emptyPage": [Function],
         "get": [Function],
         "getApi": [Function],
-        "makeInstance": [Function],
-        "makeResource": [Function],
         "mapPage": [Function],
         "pageOf": [Function],
         "patch": [Function],

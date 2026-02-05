@@ -1,17 +1,16 @@
+import { expect, describe, it, vi } from 'vitest';
 import { emptyPage, mapPage, Page, pageOf } from '../src/spring-models';
-import { makeResource } from '../src/resource';
-import { makeInstance } from '../src/utils';
 
-class Pokemon extends makeResource<Pokemon>('/api/pokemon') {
-  public id!: number;
-  public name!: string;
-  public types!: string[];
-}
+type Pokemon = {
+  id: number;
+  name: string;
+  types: string[];
+};
 
-class Bicycle extends makeResource<Bicycle>('/api/bicycle') {
-  public id!: number;
-  public brand!: string;
-}
+type Bicycle = {
+  id: number;
+  brand: string;
+};
 
 /* 
   This test is designed to trip flow, not to actually test any code.
@@ -21,23 +20,19 @@ class Bicycle extends makeResource<Bicycle>('/api/bicycle') {
 describe('emptyPage', () => {
   it('should understand that emptyPage is of type Page<T>', () => {
     const pokemonPage: Page<Pokemon> = emptyPage();
-    const bicyclePage: Page<Bicycle> = emptyPage();
-
-    const bicycleContent = emptyPage().content;
-    const pokemonContent = emptyPage().content;
-
+    expect(pokemonPage.number).toBe(0);
+    expect(pokemonPage.totalPages).toBe(0);
+    expect(pokemonPage.first).toBe(true);
+    expect(pokemonPage.last).toBe(true);
+    expect(pokemonPage.size).toBe(0);
+    expect(pokemonPage.numberOfElements).toBe(0);
     expect(pokemonPage.content.length).toBe(0);
-    expect(pokemonContent.length).toBe(0);
-    expect(bicyclePage.content.length).toBe(0);
-    expect(bicycleContent.length).toBe(0);
   });
 });
 
 describe('pageOf', () => {
   it('should create a Page with content', () => {
-    const content: Bicycle[] = [
-      makeInstance(Bicycle, { id: 1, brand: 'Gazelle' })
-    ];
+    const content: Bicycle[] = [{ id: 1, brand: 'Gazelle' }];
     const bicyclePage: Page<Bicycle> = pageOf(content);
 
     expect(bicyclePage.content.length).toBe(1);
@@ -50,11 +45,11 @@ describe('pageOf', () => {
 
   it('should create a Page of a subset of an array', () => {
     const content: Bicycle[] = [
-      makeInstance(Bicycle, { id: 1, brand: 'Gazelle' }),
-      makeInstance(Bicycle, { id: 2, brand: 'Batavus' }),
-      makeInstance(Bicycle, { id: 3, brand: 'Cortina' }),
-      makeInstance(Bicycle, { id: 4, brand: 'Giant' }),
-      makeInstance(Bicycle, { id: 5, brand: 'Cube' })
+      { id: 1, brand: 'Gazelle' },
+      { id: 2, brand: 'Batavus' },
+      { id: 3, brand: 'Cortina' },
+      { id: 4, brand: 'Giant' },
+      { id: 5, brand: 'Cube' }
     ];
     const bicyclePage: Page<Bicycle> = pageOf(content, 2, 2);
 
@@ -70,11 +65,11 @@ describe('pageOf', () => {
 
   it('should work with zero-based pagination', () => {
     const content: Bicycle[] = [
-      makeInstance(Bicycle, { id: 1, brand: 'Gazelle' }),
-      makeInstance(Bicycle, { id: 2, brand: 'Batavus' }),
-      makeInstance(Bicycle, { id: 3, brand: 'Cortina' }),
-      makeInstance(Bicycle, { id: 4, brand: 'Giant' }),
-      makeInstance(Bicycle, { id: 5, brand: 'Cube' })
+      { id: 1, brand: 'Gazelle' },
+      { id: 2, brand: 'Batavus' },
+      { id: 3, brand: 'Cortina' },
+      { id: 4, brand: 'Giant' },
+      { id: 5, brand: 'Cube' }
     ];
     const bicyclePage: Page<Bicycle> = pageOf(content, 2, 2, false);
 
@@ -97,7 +92,7 @@ describe('mapPage', () => {
 
     const page = pageOf(content, 1, 2, true);
 
-    const mapper = jest.fn((item) => ({
+    const mapper = vi.fn((item: { created: string }) => ({
       ...item,
       created: new Date(item.created)
     }));
