@@ -30,9 +30,6 @@
     "axios": {
       "optional": false
     },
-    "lodash.merge": {
-      "optional": true
-    },
     "query-string": {
       "optional": false
     }
