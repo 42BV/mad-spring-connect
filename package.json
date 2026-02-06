@@ -1,6 +1,6 @@
 {
   "name": "@42.nl/spring-connect",
-  "version": "8.0.0-rc.0",
+  "version": "8.0.0-rc.1",
   "description": "Connecting with a Spring REST APIs in a domain friendly manner",
   "files": [
     "lib"
