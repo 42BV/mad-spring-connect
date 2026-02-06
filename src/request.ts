@@ -1,7 +1,7 @@
-import { buildUrl } from './utils';
-import { Payload, QueryParams } from './types';
+import { buildUrl } from './utils.js';
+import { Payload, QueryParams } from './types.js';
 import { AxiosResponse } from 'axios';
-import { getApi } from './config';
+import { getApi } from './config.js';
 
 /**
  * Does a GET request to the given url, with the query params if

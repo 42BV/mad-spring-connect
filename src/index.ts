@@ -1,7 +1,7 @@
-export { get, post, put, patch, remove, downloadFile } from './request';
-export { configureApi, getApi } from './config';
-export type { Config } from './config';
-export { emptyPage, pageOf, mapPage } from './spring-models';
-export type { Page } from './spring-models';
-export { buildUrl } from './utils';
-export type { QueryParams, Payload } from './types';
+export { get, post, put, patch, remove, downloadFile } from './request.js';
+export { configureApi, getApi } from './config.js';
+export type { Config } from './config.js';
+export { emptyPage, pageOf, mapPage } from './spring-models.js';
+export type { Page } from './spring-models.js';
+export { buildUrl } from './utils.js';
+export type { QueryParams, Payload } from './types.js';

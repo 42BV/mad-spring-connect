@@ -1,6 +1,6 @@
 import { default as queryString } from 'query-string';
 
-import { QueryParams } from './types';
+import { QueryParams } from './types.js';
 
 // Helpers
 export function buildUrl(url: string, queryParams?: QueryParams): string {
