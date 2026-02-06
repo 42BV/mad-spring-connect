@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "declaration": true,
     "outDir": "lib",
     "esModuleInterop": true,
-    "target": "es6",
+    "target": "ES2022",
     "sourceMap": true,
-    "lib": ["es6", "dom"],
+    "lib": ["ES2022", "dom"],
     "strictNullChecks": true
   },
   "exclude": ["node_modules", "_site", "tests/*"],
