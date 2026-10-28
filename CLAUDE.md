@@ -64,5 +64,5 @@ Tests use Vitest with `vitest-mock-axios` for mocking axios. Pattern: call the r
 ## Peer Dependencies
 
 - `axios ^1.0.0` (required)
-- `query-string >=7.0.0 <10.0.0` (required)
+- `query-string >=7.0.0 <11.0.0` (required)
 - `lodash.merge` (optional)
