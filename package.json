@@ -54,6 +54,12 @@
     "vitest": "5.0.5",
     "vitest-mock-axios": "0.1.0"
   },
+  "overrides": {
+    "tmp": "0.2.7",
+    "vitest-mock-axios": {
+      "vitest": "$vitest"
+    }
+  },
   "scripts": {
     "start": "vitest --coverage",
     "clean": "rm -rf lib",
